@@ -1,0 +1,186 @@
+-- Address
+INSERT INTO Address (street, city, state, zipCode) VALUES ('72291 Manuel Brook Apt. 246', 'Blakeshire', 'MA', '97483');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('215 Erica Spur', 'Bowmanfort', 'AL', '64955');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('8518 Diane Heights Apt. 071', 'Tiffanyland', 'FL', '60920');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('982 Fletcher Station Suite 282', 'New Jason', 'WA', '96498');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('2638 Tom Lodge', 'Debbiebury', 'SC', '13095');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('4557 Banks Hollow', 'North Kylemouth', 'IL', '57067');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('377 William Throughway', 'Lake Michael', 'NH', '69027');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('412 Mary Hills', 'New Yvonneshire', 'DC', '75072');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('4967 Samuel Summit', 'Port Benjamin', 'WY', '24341');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('90762 Stephens Villages', 'Bowmanside', 'VI', '70831');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('425 Albert Crossing Apt. 035', 'Port Joanna', 'MS', '69373');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('84729 Alvarado Camp Apt. 010', 'South Joshua', 'CT', '48460');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('2252 David Land', 'East Dawnfurt', 'NC', '99206');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('7943 Butler Knolls Apt. 410', 'West Alanstad', 'MO', '06337');
+INSERT INTO Address (street, city, state, zipCode) VALUES ('7450 Justin Stream Suite 728', 'Lake Dustin', 'NC', '24238');
+
+-- Membership
+INSERT INTO Membership (points) VALUES (2416);
+INSERT INTO Membership (points) VALUES (633);
+INSERT INTO Membership (points) VALUES (9765);
+INSERT INTO Membership (points) VALUES (6186);
+INSERT INTO Membership (points) VALUES (2331);
+INSERT INTO Membership (points) VALUES (7148);
+INSERT INTO Membership (points) VALUES (4761);
+INSERT INTO Membership (points) VALUES (936);
+INSERT INTO Membership (points) VALUES (7748);
+INSERT INTO Membership (points) VALUES (2905);
+
+-- CreditCard
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('4094566673521422', 'Visa', TO_DATE('2026-10-17', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('6011805489083754', 'Discover', TO_DATE('2025-07-24', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('4417978338403518', 'Visa', TO_DATE('2026-10-15', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('377333243578937', 'Amex', TO_DATE('2026-09-02', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('6011907286285994', 'Discover', TO_DATE('2027-11-24', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('4484698192952966', 'Visa', TO_DATE('2026-09-10', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('4558869539810859', 'Visa', TO_DATE('2024-05-09', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('372350908110223', 'Amex', TO_DATE('2028-02-23', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('6011607224643839', 'Discover', TO_DATE('2026-08-28', 'YYYY-MM-DD'));
+INSERT INTO CreditCard (cardToken, cardType, expirationDate) VALUES ('6011905170912285', 'Discover', TO_DATE('2025-07-25', 'YYYY-MM-DD'));
+
+-- Customer
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Wanda', 'Long', '+1(245)-987-4225',1, 1, 1);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Jacob', 'Conley', '+1(606)-291-8784',2, 2, 2);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Krista', 'Howard', '+1(320)-318-4816',3, 3, 3);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Tyler', 'Young', '+1(759)-367-8181',4, 4, 4);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Michelle', 'Harper', '+1(465)-288-5680',5, 5, 5);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Rachel', 'Roberts', '+1(396)-377-3619',6, 6, 6);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Robin', 'Rodriguez', '+1(901)-294-8052',7, 7, 7);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('James', 'Gaines', '+1(373)-978-8575',8, 8, 8);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Michele', 'Rowland', '+1(465)-111-0228',9, 9, 9);
+INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID) VALUES ('Melinda', 'Mcneil', '+1(363)-535-9855',10, 10, 10);
+
+-- Hotel
+INSERT INTO Hotel (hotelName, addressID) VALUES ('Ball Group', 11);
+INSERT INTO Hotel (hotelName, addressID) VALUES ('Molina LLC', 12);
+INSERT INTO Hotel (hotelName, addressID) VALUES ('Buckley-Taylor', 13);
+INSERT INTO Hotel (hotelName, addressID) VALUES ('Huynh, Carter and Blanchard', 14);
+INSERT INTO Hotel (hotelName, addressID) VALUES ('Sanchez-Watson', 15);
+
+-- Amenity
+INSERT INTO Amenity (description, hotelID) VALUES ('Free Wi-Fi', 1);
+INSERT INTO Amenity (description, hotelID) VALUES ('Pet-friendly', 1);
+INSERT INTO Amenity (description, hotelID) VALUES ('Gym', 1);
+INSERT INTO Amenity (description, hotelID) VALUES ('Bar', 1);
+INSERT INTO Amenity (description, hotelID) VALUES ('Pet-friendly', 2);
+INSERT INTO Amenity (description, hotelID) VALUES ('Bar', 2);
+INSERT INTO Amenity (description, hotelID) VALUES ('Conference Room', 2);
+INSERT INTO Amenity (description, hotelID) VALUES ('Free Wi-Fi', 2);
+INSERT INTO Amenity (description, hotelID) VALUES ('Parking', 2);
+INSERT INTO Amenity (description, hotelID) VALUES ('Gym', 3);
+INSERT INTO Amenity (description, hotelID) VALUES ('Pet-friendly', 3);
+INSERT INTO Amenity (description, hotelID) VALUES ('Breakfast', 3);
+INSERT INTO Amenity (description, hotelID) VALUES ('Free Wi-Fi', 3);
+INSERT INTO Amenity (description, hotelID) VALUES ('Conference Room', 3);
+INSERT INTO Amenity (description, hotelID) VALUES ('Bar', 3);
+INSERT INTO Amenity (description, hotelID) VALUES ('Free Wi-Fi', 4);
+INSERT INTO Amenity (description, hotelID) VALUES ('Bar', 4);
+INSERT INTO Amenity (description, hotelID) VALUES ('Gym', 4);
+INSERT INTO Amenity (description, hotelID) VALUES ('Conference Room', 4);
+INSERT INTO Amenity (description, hotelID) VALUES ('Pet-friendly', 5);
+INSERT INTO Amenity (description, hotelID) VALUES ('Conference Room', 5);
+INSERT INTO Amenity (description, hotelID) VALUES ('Pool', 5);
+INSERT INTO Amenity (description, hotelID) VALUES ('Free Wi-Fi', 5);
+INSERT INTO Amenity (description, hotelID) VALUES ('Gym', 5);
+INSERT INTO Amenity (description, hotelID) VALUES ('Parking', 5);
+
+-- RoomType
+INSERT INTO RoomType (description, maxGuests) VALUES ('Single', 10);
+INSERT INTO RoomType (description, maxGuests) VALUES ('Double', 10);
+INSERT INTO RoomType (description, maxGuests) VALUES ('Triple', 10);
+INSERT INTO RoomType (description, maxGuests) VALUES ('Quad', 10);
+INSERT INTO RoomType (description, maxGuests) VALUES ('Queen', 10);
+INSERT INTO RoomType (description, maxGuests) VALUES ('King', 10);
+INSERT INTO RoomType (description, maxGuests) VALUES ('Twin', 10);
+INSERT INTO RoomType (description, maxGuests) VALUES ('Suite', 10);
+
+-- Reservation
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (1, 5, 4, 10, TO_DATE('2022-06-09', 'YYYY-MM-DD'), TO_DATE('2022-06-30', 'YYYY-MM-DD'), 'Cancelled');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (2, 1, 8, 10, TO_DATE('2023-06-02', 'YYYY-MM-DD'), TO_DATE('2023-06-17', 'YYYY-MM-DD'), 'Confirmed');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (3, 3, 4, 10, TO_DATE('2023-11-30', 'YYYY-MM-DD'), TO_DATE('2023-12-03', 'YYYY-MM-DD'), 'Confirmed');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (4, 1, 3, 10, TO_DATE('2023-02-09', 'YYYY-MM-DD'), TO_DATE('2023-03-04', 'YYYY-MM-DD'), 'Checked Out');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (5, 1, 1, 10, TO_DATE('2022-09-03', 'YYYY-MM-DD'), TO_DATE('2022-09-16', 'YYYY-MM-DD'), 'Checked Out');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (6, 4, 1, 10, TO_DATE('2022-04-08', 'YYYY-MM-DD'), TO_DATE('2022-04-30', 'YYYY-MM-DD'), 'Cancelled');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (7, 2, 3, 10, TO_DATE('2022-12-17', 'YYYY-MM-DD'), TO_DATE('2023-01-05', 'YYYY-MM-DD'), 'Checked Out');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (8, 3, 5, 10, TO_DATE('2023-03-27', 'YYYY-MM-DD'), TO_DATE('2023-04-12', 'YYYY-MM-DD'), 'Checked In');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (9, 3, 8, 10, TO_DATE('2023-11-19', 'YYYY-MM-DD'), TO_DATE('2023-12-07', 'YYYY-MM-DD'), 'Confirmed');
+INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus) VALUES (10, 1, 8, 10, TO_DATE('2022-05-16', 'YYYY-MM-DD'), TO_DATE('2022-06-05', 'YYYY-MM-DD'), 'Cancelled');
+
+-- Payment
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (3, 4, 142.5, 18, TO_DATE('2023-09-15', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (4, 8, 376.01, 30, TO_DATE('2023-11-14', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (3, 8, 223.85, 48, TO_DATE('2023-11-14', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (8, 1, 281.2, 16, TO_DATE('2023-05-26', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (3, 10, 265.47, 30, TO_DATE('2023-06-19', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (4, 8, 474.27, 8, TO_DATE('2023-11-14', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (5, 7, 241.29, 26, TO_DATE('2024-02-19', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (5, 8, 302.18, 30, TO_DATE('2023-11-14', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (6, 1, 141.9, 11, TO_DATE('2023-05-26', 'YYYY-MM-DD'));
+INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate) VALUES (1, 10, 242.13, 11, TO_DATE('2023-06-19', 'YYYY-MM-DD'));
+
+-- Room
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (4, 3, 6, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (1, 13, 8, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (5, 13, 5, 'Available');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (4, 28, 4, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (5, 31, 4, 'Occupied');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (5, 99, 1, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (5, 45, 6, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (4, 84, 4, 'Occupied');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (2, 31, 2, 'Available');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (4, 77, 7, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (3, 85, 5, 'Occupied');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (4, 38, 6, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (3, 9, 1, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (3, 71, 8, 'Out of service');
+INSERT INTO Room (hotelID, roomNumber, roomTypeID, roomStatus) VALUES (2, 58, 2, 'Out of service');
+
+-- Manager
+INSERT INTO Manager (firstName, lastName, phoneNumber, hotelID) VALUES ('Michelle', 'Lang', '+1(959)-181-9134', 4);
+INSERT INTO Manager (firstName, lastName, phoneNumber, hotelID) VALUES ('James', 'Parks', '+1(317)-101-4846', 4);
+INSERT INTO Manager (firstName, lastName, phoneNumber, hotelID) VALUES ('Lori', 'Harris', '+1(505)-924-5328', 1);
+INSERT INTO Manager (firstName, lastName, phoneNumber, hotelID) VALUES ('Raven', 'Hurst', '+1(335)-883-1922', 2);
+INSERT INTO Manager (firstName, lastName, phoneNumber, hotelID) VALUES ('Ricky', 'Lee', '+1(763)-871-0656', 5);
+
+-- RoomRate
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (5, 1, TO_DATE('2021-05-09', 'YYYY-MM-DD'), TO_DATE('2022-10-23', 'YYYY-MM-DD'), 203.65);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (1, 3, TO_DATE('2021-10-04', 'YYYY-MM-DD'), TO_DATE('2022-04-18', 'YYYY-MM-DD'), 302.14);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (7, 4, TO_DATE('2021-07-19', 'YYYY-MM-DD'), TO_DATE('2022-04-08', 'YYYY-MM-DD'), 297.23);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (5, 3, TO_DATE('2021-09-04', 'YYYY-MM-DD'), TO_DATE('2022-06-11', 'YYYY-MM-DD'), 96.26);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 5, TO_DATE('2022-02-04', 'YYYY-MM-DD'), TO_DATE('2023-02-23', 'YYYY-MM-DD'), 216.74);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (1, 5, TO_DATE('2022-03-16', 'YYYY-MM-DD'), TO_DATE('2022-09-20', 'YYYY-MM-DD'), 207.63);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (2, 2, TO_DATE('2022-01-24', 'YYYY-MM-DD'), TO_DATE('2022-10-30', 'YYYY-MM-DD'), 429.95);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (2, 3, TO_DATE('2021-07-30', 'YYYY-MM-DD'), TO_DATE('2022-08-17', 'YYYY-MM-DD'), 104.69);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (4, 1, TO_DATE('2021-05-03', 'YYYY-MM-DD'), TO_DATE('2022-11-29', 'YYYY-MM-DD'), 105.43);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (7, 5, TO_DATE('2022-03-17', 'YYYY-MM-DD'), TO_DATE('2023-01-20', 'YYYY-MM-DD'), 63.9);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (6, 3, TO_DATE('2021-04-01', 'YYYY-MM-DD'), TO_DATE('2023-02-16', 'YYYY-MM-DD'), 231.5);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 5, TO_DATE('2022-02-28', 'YYYY-MM-DD'), TO_DATE('2023-02-08', 'YYYY-MM-DD'), 97.31);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (4, 4, TO_DATE('2021-12-18', 'YYYY-MM-DD'), TO_DATE('2022-05-13', 'YYYY-MM-DD'), 285.04);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (7, 2, TO_DATE('2022-01-05', 'YYYY-MM-DD'), TO_DATE('2022-08-07', 'YYYY-MM-DD'), 184.47);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 2, TO_DATE('2021-12-03', 'YYYY-MM-DD'), TO_DATE('2022-07-05', 'YYYY-MM-DD'), 204.06);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (5, 1, TO_DATE('2022-01-15', 'YYYY-MM-DD'), TO_DATE('2022-06-05', 'YYYY-MM-DD'), 202.98);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (1, 3, TO_DATE('2021-10-29', 'YYYY-MM-DD'), TO_DATE('2022-12-16', 'YYYY-MM-DD'), 75.05);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (1, 2, TO_DATE('2021-09-03', 'YYYY-MM-DD'), TO_DATE('2022-12-02', 'YYYY-MM-DD'), 52.91);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 5, TO_DATE('2021-04-30', 'YYYY-MM-DD'), TO_DATE('2022-12-31', 'YYYY-MM-DD'), 60.78);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (4, 3, TO_DATE('2022-01-29', 'YYYY-MM-DD'), TO_DATE('2022-08-31', 'YYYY-MM-DD'), 117.14);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (7, 2, TO_DATE('2021-05-23', 'YYYY-MM-DD'), TO_DATE('2023-02-08', 'YYYY-MM-DD'), 76.49);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 4, TO_DATE('2021-07-08', 'YYYY-MM-DD'), TO_DATE('2023-02-21', 'YYYY-MM-DD'), 348.81);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (3, 2, TO_DATE('2021-07-21', 'YYYY-MM-DD'), TO_DATE('2022-11-20', 'YYYY-MM-DD'), 402.45);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (2, 4, TO_DATE('2021-10-08', 'YYYY-MM-DD'), TO_DATE('2023-02-18', 'YYYY-MM-DD'), 350.31);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (7, 3, TO_DATE('2021-11-30', 'YYYY-MM-DD'), TO_DATE('2023-01-09', 'YYYY-MM-DD'), 281.52);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (1, 3, TO_DATE('2022-01-11', 'YYYY-MM-DD'), TO_DATE('2022-07-03', 'YYYY-MM-DD'), 225.58);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (2, 5, TO_DATE('2021-07-02', 'YYYY-MM-DD'), TO_DATE('2023-03-23', 'YYYY-MM-DD'), 445.65);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (5, 2, TO_DATE('2021-06-13', 'YYYY-MM-DD'), TO_DATE('2022-08-22', 'YYYY-MM-DD'), 124.89);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 4, TO_DATE('2021-09-13', 'YYYY-MM-DD'), TO_DATE('2022-09-09', 'YYYY-MM-DD'), 118.33);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (2, 4, TO_DATE('2021-10-09', 'YYYY-MM-DD'), TO_DATE('2022-06-01', 'YYYY-MM-DD'), 410.62);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (6, 5, TO_DATE('2021-07-07', 'YYYY-MM-DD'), TO_DATE('2023-03-14', 'YYYY-MM-DD'), 150.82);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (7, 4, TO_DATE('2021-07-19', 'YYYY-MM-DD'), TO_DATE('2022-03-30', 'YYYY-MM-DD'), 409.38);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (7, 1, TO_DATE('2021-07-18', 'YYYY-MM-DD'), TO_DATE('2022-06-04', 'YYYY-MM-DD'), 246.12);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (6, 1, TO_DATE('2021-05-18', 'YYYY-MM-DD'), TO_DATE('2022-07-13', 'YYYY-MM-DD'), 126.38);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 3, TO_DATE('2022-03-13', 'YYYY-MM-DD'), TO_DATE('2023-03-04', 'YYYY-MM-DD'), 427.91);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (2, 3, TO_DATE('2021-09-03', 'YYYY-MM-DD'), TO_DATE('2022-06-04', 'YYYY-MM-DD'), 317.08);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 4, TO_DATE('2022-03-04', 'YYYY-MM-DD'), TO_DATE('2023-02-04', 'YYYY-MM-DD'), 452.25);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (5, 3, TO_DATE('2021-05-29', 'YYYY-MM-DD'), TO_DATE('2023-01-20', 'YYYY-MM-DD'), 201.39);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (8, 4, TO_DATE('2021-04-25', 'YYYY-MM-DD'), TO_DATE('2022-05-09', 'YYYY-MM-DD'), 275.35);
+INSERT INTO RoomRate (roomTypeID, managerID, startDate, endDate, price) VALUES (1, 4, TO_DATE('2021-11-22', 'YYYY-MM-DD'), TO_DATE('2022-11-11', 'YYYY-MM-DD'), 71.4);

@@ -1,0 +1,374 @@
+-- Drop triggers
+DROP TRIGGER payment_bir;
+DROP TRIGGER payment_before_insert;
+DROP TRIGGER payment_points_update;
+DROP TRIGGER reservation_bir;
+DROP TRIGGER reservation_guests_check;
+DROP TRIGGER room_bir;
+DROP TRIGGER manager_bir;
+DROP TRIGGER room_rate_bir;
+DROP TRIGGER room_type_bir;
+DROP TRIGGER amenity_bir;
+DROP TRIGGER hotel_bir;
+DROP TRIGGER customer_bir;
+DROP TRIGGER membership_bir;
+DROP TRIGGER credit_card_bir;
+DROP TRIGGER address_bir;
+
+-- Drop tables
+DROP TABLE Payment CASCADE CONSTRAINTS;
+DROP TABLE Reservation CASCADE CONSTRAINTS;
+DROP TABLE Room CASCADE CONSTRAINTS;
+DROP TABLE RoomRate CASCADE CONSTRAINTS;
+DROP TABLE Manager CASCADE CONSTRAINTS;
+DROP TABLE Amenity CASCADE CONSTRAINTS;
+DROP TABLE RoomType CASCADE CONSTRAINTS;
+DROP TABLE Hotel CASCADE CONSTRAINTS;
+DROP TABLE Customer CASCADE CONSTRAINTS;
+DROP TABLE CreditCard CASCADE CONSTRAINTS;
+DROP TABLE Membership CASCADE CONSTRAINTS;
+DROP TABLE Address CASCADE CONSTRAINTS;
+
+-- Drop sequences
+DROP SEQUENCE payment_seq;
+DROP SEQUENCE reservation_seq;
+DROP SEQUENCE room_seq;
+DROP SEQUENCE manager_seq;
+DROP SEQUENCE room_rate_seq;
+DROP SEQUENCE room_type_seq;
+DROP SEQUENCE amenity_seq;
+DROP SEQUENCE hotel_seq;
+DROP SEQUENCE customer_seq;
+DROP SEQUENCE credit_card_seq;
+DROP SEQUENCE membership_seq;
+DROP SEQUENCE address_seq;
+commit;
+
+-- Create sequences
+CREATE SEQUENCE address_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE customer_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE credit_card_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE membership_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE hotel_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE amenity_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE room_type_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE reservation_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE payment_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE room_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE manager_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE room_rate_seq START WITH 1 INCREMENT BY 1;
+
+-- Address table and trigger
+CREATE TABLE Address (
+    addressID INT PRIMARY KEY,
+    street VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    zipCode VARCHAR(5) NOT NULL
+);
+
+CREATE OR REPLACE TRIGGER address_bir
+BEFORE INSERT ON Address
+FOR EACH ROW
+BEGIN
+  SELECT address_seq.NEXTVAL
+  INTO   :new.addressID
+  FROM   dual;
+END;
+/
+
+-- Membership table and trigger
+CREATE TABLE Membership (
+    membershipID INT PRIMARY KEY,
+    points INT NOT NULL CHECK (points >= 0)
+);
+
+CREATE OR REPLACE TRIGGER membership_bir
+BEFORE INSERT ON Membership
+FOR EACH ROW
+BEGIN
+  SELECT membership_seq.NEXTVAL
+  INTO :new.membershipID
+  FROM dual;
+END;
+/
+
+-- CreditCard table and trigger
+CREATE TABLE CreditCard (
+    cardID INT PRIMARY KEY,
+    cardToken VARCHAR(255) NOT NULL,
+    cardType VARCHAR(20) NOT NULL,
+    expirationDate DATE NOT NULL
+);
+
+CREATE OR REPLACE TRIGGER credit_card_bir
+BEFORE INSERT ON CreditCard
+FOR EACH ROW
+BEGIN
+  SELECT credit_card_seq.NEXTVAL
+  INTO   :new.cardID
+  FROM   dual;
+END;
+/
+
+-- Customer table and trigger
+CREATE TABLE Customer (
+    customerID INT PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL,
+    cardID INT NOT NULL,
+    addressID INT NOT NULL,
+    membershipID INT NOT NULL,
+    FOREIGN KEY (cardID) REFERENCES CreditCard(cardID) ON DELETE CASCADE,
+    FOREIGN KEY (addressID) REFERENCES Address(addressID) ON DELETE CASCADE,
+    FOREIGN KEY (membershipID) REFERENCES Membership(membershipID) ON DELETE CASCADE
+);
+
+CREATE OR REPLACE TRIGGER customer_bir
+BEFORE INSERT ON Customer
+FOR EACH ROW
+BEGIN
+SELECT customer_seq.NEXTVAL
+INTO :new.customerID
+FROM dual;
+END;
+/
+
+
+-- Hotel table and trigger
+CREATE TABLE Hotel (
+    hotelID INT PRIMARY KEY,
+    hotelName VARCHAR(255) NOT NULL,
+    addressID INT NOT NULL,
+    FOREIGN KEY (addressID) REFERENCES Address(addressID)
+);
+
+CREATE OR REPLACE TRIGGER hotel_bir
+BEFORE INSERT ON Hotel
+FOR EACH ROW
+BEGIN
+SELECT hotel_seq.NEXTVAL
+INTO :new.hotelID
+FROM dual;
+END;
+/
+
+
+-- Amenity table and trigger
+CREATE TABLE Amenity (
+    amenityID INT PRIMARY KEY,
+    description VARCHAR(255) NOT NULL,
+    hotelID INT NOT NULL,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID)
+);
+
+CREATE OR REPLACE TRIGGER amenity_bir
+BEFORE INSERT ON Amenity
+FOR EACH ROW
+BEGIN
+  SELECT amenity_seq.NEXTVAL
+  INTO   :new.amenityID
+  FROM   dual;
+END;
+/
+
+
+-- RoomType table and trigger
+CREATE TABLE RoomType (
+    roomTypeID INT PRIMARY KEY,
+    description VARCHAR(1000) NOT NULL,
+    maxGuests INT NOT NULL
+);
+
+CREATE OR REPLACE TRIGGER room_type_bir
+BEFORE INSERT ON RoomType
+FOR EACH ROW
+BEGIN
+  SELECT room_type_seq.NEXTVAL
+  INTO   :new.roomTypeID
+  FROM   dual;
+END;
+/
+
+
+-- Reservation table and trigger
+CREATE TABLE Reservation (
+    reservationID INT PRIMARY KEY,
+    customerID INT NOT NULL,
+    hotelID INT NOT NULL,
+    roomTypeID INT NOT NULL,
+    numberOfGuests INT NOT NULL,
+    arrivalDate DATE NOT NULL,
+    departureDate DATE NOT NULL,
+    reservationStatus VARCHAR(20) NOT NULL,
+    FOREIGN KEY (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID),
+    FOREIGN KEY (roomTypeID) REFERENCES RoomType(roomTypeID)
+);
+
+CREATE OR REPLACE TRIGGER reservation_bir
+BEFORE INSERT ON Reservation
+FOR EACH ROW
+BEGIN
+  SELECT reservation_seq.NEXTVAL
+  INTO   :new.reservationID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER reservation_guests_check
+BEFORE INSERT ON Reservation
+FOR EACH ROW
+DECLARE
+  v_max_guests INT;
+BEGIN
+  SELECT maxGuests
+  INTO   v_max_guests
+  FROM   RoomType
+  WHERE  roomTypeID = :new.roomTypeID;
+
+  IF :new.numberOfGuests > v_max_guests THEN
+    RAISE_APPLICATION_ERROR(-20001, 'The number of guests exceeds the maximum number of guests allowed for the selected room type.');
+  END IF;
+END;
+/
+
+
+-- Payment table and trigger
+CREATE TABLE Payment (
+    paymentID INT PRIMARY KEY,
+    customerID INT NOT NULL,
+    reservationID INT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL CHECK (amount > 0),
+    pointsUsed INT NOT NULL CHECK (pointsUsed >= 0),
+    paymentDate DATE NOT NULL,
+    FOREIGN KEY (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE,
+    FOREIGN KEY (reservationID) REFERENCES Reservation(reservationID)
+);
+
+
+
+CREATE OR REPLACE TRIGGER payment_bir
+BEFORE INSERT ON Payment
+FOR EACH ROW
+BEGIN
+  SELECT payment_seq.NEXTVAL
+  INTO   :new.paymentID
+  FROM   dual;
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER payment_before_insert
+BEFORE INSERT ON Payment
+FOR EACH ROW
+BEGIN
+    :NEW.pointsUsed := COALESCE(:NEW.pointsUsed, 0);
+END;
+/
+
+CREATE OR REPLACE TRIGGER payment_points_update
+AFTER INSERT ON Payment
+FOR EACH ROW
+WHEN (NEW.pointsUsed > 0)
+BEGIN
+    UPDATE Membership
+    SET points = points - :NEW.pointsUsed
+    WHERE membershipID = :NEW.customerID;
+END;
+/
+
+-- Room table and trigger
+CREATE TABLE Room (
+    roomID INT PRIMARY KEY,
+    hotelID INT NOT NULL,
+    roomNumber INT NOT NULL,
+    roomTypeID INT NOT NULL,
+    roomStatus VARCHAR(20) NOT NULL,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID),
+    FOREIGN KEY (roomTypeID) REFERENCES RoomType(roomTypeID),
+    UNIQUE (hotelID, roomNumber)
+);
+
+CREATE OR REPLACE TRIGGER room_bir
+BEFORE INSERT ON Room
+FOR EACH ROW
+BEGIN
+  SELECT room_seq.NEXTVAL
+  INTO   :new.roomID
+  FROM   dual;
+END;
+/
+
+
+-- Manager table and trigger
+CREATE TABLE Manager (
+    managerID INT PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL,
+    hotelID INT NOT NULL,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID)
+);
+
+CREATE TRIGGER manager_bir
+BEFORE INSERT ON Manager
+FOR EACH ROW
+BEGIN
+  SELECT manager_seq.NEXTVAL
+  INTO   :new.managerID
+  FROM   dual;
+END;
+/
+
+
+-- RoomRate table and trigger
+CREATE TABLE RoomRate (
+    roomRateID INT PRIMARY KEY,
+    roomTypeID INT NOT NULL,
+    managerID INT NOT NULL,
+    startDate DATE NOT NULL,
+    endDate DATE NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (roomTypeID) REFERENCES RoomType(roomTypeID),
+    FOREIGN KEY (managerID) REFERENCES Manager(managerID),
+    CHECK (startDate <= endDate),
+    UNIQUE (roomTypeID, startDate, endDate)
+);
+
+
+CREATE TRIGGER room_rate_bir
+BEFORE INSERT ON RoomRate
+FOR EACH ROW
+BEGIN
+  SELECT room_rate_seq.NEXTVAL
+  INTO   :new.roomRateID
+  FROM   dual;
+END;
+/
+
+commit;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
