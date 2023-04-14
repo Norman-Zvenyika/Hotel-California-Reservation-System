@@ -1,5 +1,6 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 import java.io.*;
 import java.sql.*;
 
@@ -34,10 +35,35 @@ public class HotelCalifornia {
             {
                 //printout status connection
                 System.out.println("Connection successfully made.\n");
-                System.out.println("Welcome "+userName+"!");
-                System.out.println();
+                System.out.println("Welcome to Hotel California "+userName+"!");
+                System.out.println("\n");
 
-                //interfaces
+                //continues loop to provide options until the user terminates the program
+                boolean exit = false;
+                while(exit==false) {
+                    
+                    //display and get the user option
+                    int option = printOptions(myScanner);
+
+                    switch(option) {
+                        case 1:
+                            System.out.println("Customer online reservation access\n");
+                            break;
+                        case 2:
+                            System.out.println("Front-desk agent\n");
+                            break;
+                        case 3:
+                            System.out.println("Housekeeping\n");
+                            break;
+                        case 4:
+                            System.out.println("Business manager\n");
+                            break;
+                        case 5:
+                            exit = true;
+                            break;
+                    }
+                }
+
 
                 //close the scanner and statement
                 myScanner.close();
@@ -85,5 +111,39 @@ public class HotelCalifornia {
 
         //return user credentials
         return userCredentials;
+    }
+
+    //print options to the user
+    public static int printOptions(Scanner myScanner) {
+        
+        //validate the option
+        boolean validOption = false;
+
+        //useroption
+        String userOption = "";
+
+        //loop for options
+        while(validOption==false){
+            //print possible options
+            System.out.println( "1. Customer online reservation access\n" +
+                            "2. Front-desk agent\n" +
+                            "3. Housekeeping\n" +
+                            "4. Business manager\n" +
+                            "5. Exit \n");
+
+            System.out.print("Enter an option (1-4): ");
+            userOption = myScanner.next();
+
+            //validate the option
+            if(userOption.matches("^[1-5]$")) {
+                validOption = true;
+            }
+            else {
+                System.out.println("Invalid option.");
+            }
+        }
+
+        //return the option
+        return Integer.parseInt(userOption);
     }
 }
