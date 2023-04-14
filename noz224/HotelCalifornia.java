@@ -31,14 +31,13 @@ public class HotelCalifornia {
             //estabilish connection
             try (
                 Connection con = DriverManager.getConnection("jdbc:oracle:thin:@edgar1.cse.lehigh.edu:1521:cse241", userName, passWord);
+                Statement s = con.createStatement();
                 ) 
             {
                 //printout status connection
-                System.out.println("Connection successfully made.\n");
-                System.out.println("Welcome to Hotel California "+userName+"!");
-                System.out.println("\n");
+                System.out.println("Welcome to Hotel California "+userName+"!\n");
 
-                //continues loop to provide options until the user terminates the program
+                //continue loop to provide options until the user terminates the program
                 boolean exit = false;
                 while(exit==false) {
                     
@@ -48,22 +47,26 @@ public class HotelCalifornia {
                     switch(option) {
                         case 1:
                             System.out.println("Customer online reservation access\n");
+                            //CustomerOnlineReservation.startMenu();
                             break;
                         case 2:
                             System.out.println("Front-desk agent\n");
+                            //CustomerOnlineReservation.startMenu();
                             break;
                         case 3:
                             System.out.println("Housekeeping\n");
+                            //CustomerOnlineReservation.startMenu();
                             break;
                         case 4:
                             System.out.println("Business manager\n");
+                            //CustomerOnlineReservation.startMenu();
                             break;
                         case 5:
+                            System.out.println("Program closing.......\n");
                             exit = true;
                             break;
                     }
                 }
-
 
                 //close the scanner and statement
                 myScanner.close();
