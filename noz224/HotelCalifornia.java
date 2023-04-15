@@ -47,7 +47,7 @@ public class HotelCalifornia {
                     switch(option) {
                         case 1:
                             System.out.println("Customer online reservation access\n");
-                            //CustomerOnlineReservation.startMenu();
+                            CustomerOnlineReservation.mainMenu(con,s, myScanner);
                             break;
                         case 2:
                             System.out.println("Front-desk agent\n");
@@ -106,11 +106,11 @@ public class HotelCalifornia {
 
         //request for username
         System.out.print("Enter Oracle username: ");
-        userCredentials[0] = myScanner.next();
+        userCredentials[0] = myScanner.nextLine();
      
         //request password
         System.out.print("Enter Oracle user password: ");
-        userCredentials[1] = myScanner.next();
+        userCredentials[1] = myScanner.nextLine();
 
         //return user credentials
         return userCredentials;
@@ -135,7 +135,7 @@ public class HotelCalifornia {
                             "5. Exit \n");
 
             System.out.print("Enter an option (1-4): ");
-            userOption = myScanner.next();
+            userOption = myScanner.nextLine();
 
             //validate the option
             if(userOption.matches("^[1-5]$")) {
