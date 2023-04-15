@@ -1,0 +1,17 @@
+-- Create a stored procedure for inserting a new payment and returning its ID
+CREATE OR REPLACE PROCEDURE insert_new_payment
+(
+    p_customerID IN Payment.customerID%TYPE,
+    p_reservationID IN Payment.reservationID%TYPE,
+    p_amount IN Payment.amount%TYPE,
+    p_pointsUsed IN Payment.pointsUsed%TYPE,
+    p_paymentDate IN Payment.paymentDate%TYPE,
+    o_paymentID OUT Payment.paymentID%TYPE
+)
+IS
+BEGIN
+    INSERT INTO Payment (customerID, reservationID, amount, pointsUsed, paymentDate)
+    VALUES (p_customerID, p_reservationID, p_amount, p_pointsUsed, p_paymentDate)
+    RETURNING paymentID INTO o_paymentID;
+END;
+/

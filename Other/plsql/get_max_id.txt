@@ -1,0 +1,17 @@
+-- This stored function takes two parameters: the table name and the ID column name.
+-- It returns the maximum value of the given ID column from the specified table.
+CREATE OR REPLACE FUNCTION get_max_id(p_table_name IN VARCHAR2, p_id_column_name IN VARCHAR2)
+RETURN NUMBER
+IS
+    -- Declare a variable to store the maximum ID value
+    v_max_id NUMBER;
+BEGIN
+    -- Execute the dynamically constructed SQL query to get the maximum ID value
+    -- from the specified table and ID column
+    EXECUTE IMMEDIATE 'SELECT MAX(' || p_id_column_name || ') FROM ' || p_table_name
+    INTO v_max_id;
+
+    -- Return the maximum ID value
+    RETURN v_max_id;
+END;
+/

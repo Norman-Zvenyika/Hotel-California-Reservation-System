@@ -1,0 +1,15 @@
+CREATE OR REPLACE PROCEDURE insert_new_membership(p_membershipID OUT NUMBER)
+IS
+    v_random_points NUMBER;
+BEGIN
+    -- Generate random points between 0 and 10
+    v_random_points := TRUNC(DBMS_RANDOM.VALUE(0, 11));
+
+    -- Insert a new membership record with the generated random points
+    INSERT INTO Membership (points)
+    VALUES (v_random_points)
+    RETURNING membershipID INTO p_membershipID;
+
+    COMMIT;
+END;
+/

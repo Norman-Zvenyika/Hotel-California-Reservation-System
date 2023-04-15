@@ -1,0 +1,20 @@
+-- Create a stored procedure for inserting a new customer
+CREATE OR REPLACE PROCEDURE insert_new_customer(
+    p_firstName IN Customer.firstName%TYPE,        -- Input parameter: First name
+    p_lastName IN Customer.lastName%TYPE,          -- Input parameter: Last name
+    p_phoneNumber IN Customer.phoneNumber%TYPE,    -- Input parameter: Phone number
+    p_cardID IN Customer.cardID%TYPE,              -- Input parameter: Card ID
+    p_addressID IN Customer.addressID%TYPE,        -- Input parameter: Address ID
+    p_membershipID IN Customer.membershipID%TYPE,  -- Input parameter: Membership ID
+    p_customerID OUT Customer.customerID%TYPE)     -- Output parameter: Customer ID
+IS
+BEGIN
+    -- Insert a new row into the Customer table using the provided values and return the generated customer ID
+    INSERT INTO Customer (firstName, lastName, phoneNumber, cardID, addressID, membershipID)
+    VALUES (p_firstName, p_lastName, p_phoneNumber, p_cardID, p_addressID, p_membershipID)
+    RETURNING customerID INTO p_customerID;
+    
+    -- Commit the transaction
+    COMMIT;
+END;
+/

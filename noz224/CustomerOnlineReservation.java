@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,13 +13,16 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Map.Entry;
 import java.util.Date;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.regex.Pattern;
 
 public class CustomerOnlineReservation {
 
     // mainMenu
     public static void mainMenu(Connection con, Statement s, Scanner myScanner) {
+
+        //boolean for completing reservation
+        boolean reservationComplete = false;
 
         // Request the arrival date of the reservation
         System.out.print("Enter the arrival date of your reservation (YYYY-MM-DD): ");
@@ -103,81 +108,328 @@ public class CustomerOnlineReservation {
                     //print status of the customer
                     System.out.println("\nYour account was found.\n");
 
-                    //retrieve the customer information
-                    Customer customerInfor = getCustomerInformation(con, customerID);
-                    
-                    //retrieve card information
-                    Card customerCardInfor = getcustomerCardInfo(con, customerID);
-
-                    //check if the card has not expired
-                    boolean validCard = false;
-                    while(validCard==false) {
-                        validCard = checkExpirationDateOfCard(customerCardInfor.getExpirationDate());
-                        
-                        if(validCard==false) {
-                            System.out.println("\nYour card is not valid. It expired on "+ customerCardInfor.getExpirationDate());
-                            System.out.println("\nUse a valid card : ");
-                            //customerCardInfor = createNewCard(myScanner);
-                        }
-                    }
-
-                    //calculate the cost of the customer stay based on the roomType and number of days
-                    double bookingPrice = getBookingPrice(con, roomTypeID, arrivalDate, departureDate);
-
-                    //get the number of points belonging to the user
-                    int numOfPoints = getNumberOfPoints(con, customerID);
-
-                    //get the number of points the user wants to use
-                    int numOfPointsUsed = getNumberOfPointsUsed(myScanner,numOfPoints);
-
-                    if (numOfPointsUsed > 0) {
-                        
-                        //fixed equivalent amount for each pooint
-                        double pointsCost = 0.005;
-
-                        //calculate the discount
-                        double discount = calculateDiscount(numOfPointsUsed, pointsCost);
-                        System.out.printf("\nThe discount is $%.2f%n\n", discount);
-
-                        //deduct discount to reflect the new amount
-                        bookingPrice = bookingPrice - discount;
-
-                    }
-
-                    //display the price
-                    System.out.printf("\nYour total bill is $%.2f%n\n", bookingPrice);
-
-                    //update the records
-
-                    //ask if they want to use their points
-
-                    //the trigger should automatically deduct 
-
-                    //enter the information in necessary tables
+                    //complete the reservation
+                    reservationComplete  = makeReservation(con,customerID,arrivalDate,departureDate,roomTypeID, myScanner, numberOfGuests, userHotelID); 
 
 
                 }
                 else if(customerStatus==0) {
-                    System.out.println("You account was  not found. Let us create a new account for you.");
+                    System.out.println("\nYour account was  not found. Let us create a new account for you.\n");
 
-                    // //request their personal information
-                    // Customer newCustomer = createNewCustomer(con, myScanner);
+                    //request their personal information
+                    int newCustomerID = createNewCustomer(con, myScanner);
 
-                    // //request their card infrmation
-                    // Card newCsutmerCadInfor = createNewCard(con, myScanner);
+                    System.out.println("\nYou a now a customer of Hotel California!\n");
 
-                    //calculate their bills
+                    //complete the reservation
+                    reservationComplete  = makeReservation(con,newCustomerID,arrivalDate,departureDate,roomTypeID, myScanner, numberOfGuests, userHotelID); 
 
-                    //get points
-
-                    //ask if they want to use their points
-
-                    //the trigger should automatically deduct 
-
-                    //enter the information in necessary tables
                 }
             }
         }
+
+        if(reservationComplete) {
+            System.out.println("\nThe reservation has been completed succesfully.\n");
+        }
+        else {
+            System.out.println("\nReservation failed. Try again\n");
+        }
+    }
+
+    //format the date for SQL
+    private static java.sql.Date convertStringToSqlDate(String dateString) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date parsedDate = format.parse(dateString);
+            return new java.sql.Date(parsedDate.getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // make a reservation for a specific customer
+    public static boolean makeReservation(Connection con,int customerID, String arrivalDate,String departureDate,
+                                            int roomTypeID, Scanner myScanner, int numOfGuests, int hotelID) {
+                    
+        //retrieve card information
+        Card customerCardInfor = getcustomerCardInfo(con, customerID);
+
+        //check if the card has not expired
+        boolean validCard = false;
+        while(validCard==false) {
+            validCard = checkExpirationDateOfCard(customerCardInfor.getExpirationDate());
+            
+            if(validCard==false) {
+                System.out.println("\nYour card is not valid. It expired on "+ customerCardInfor.getExpirationDate());
+                System.out.println("\nUse a valid card : ");
+                //customerCardInfor = createNewCard(myScanner);
+            }
+        }
+
+        //calculate the cost of the customer stay based on the roomType and number of days
+        double bookingPrice = getBookingPrice(con, roomTypeID, arrivalDate, departureDate);
+
+        //get the number of points belonging to the user
+        int numOfPoints = getNumberOfPoints(con, customerID);
+
+        //let the user know their number of points available
+        System.out.printf("You have %d membership points\n", numOfPoints);
+        int numOfPointsUsed = 0;
+        
+        //only ask if the user wants to use some points that is if they have some already
+        if(numOfPoints > 0) {
+
+            //get the number of points the user wants to use
+            numOfPointsUsed = getNumberOfPointsUsed(myScanner,numOfPoints);
+
+            if (numOfPointsUsed > 0) {
+                
+                //fixed equivalent amount for each pooint
+                double pointsCost = 0.005;
+
+                //calculate the discount
+                double discount = calculateDiscount(numOfPointsUsed, pointsCost);
+                System.out.printf("\nThe discount is $%.2f%n\n", discount);
+
+                //deduct discount to reflect the new amount
+                bookingPrice = bookingPrice - discount;
+
+            }
+        }
+
+        //display the price
+        System.out.printf("\nYour total bill is $%.2f%n\n", bookingPrice);
+
+        //format payment date
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String paymentDate = currentDate.format(formatter);
+        java.sql.Date sqlPaymentDate = convertStringToSqlDate(paymentDate);
+
+        //set reservation status to complete
+        String reservationStatus = "Confirmed";
+
+        //format date
+        java.sql.Date sqlArrivalDate = convertStringToSqlDate(arrivalDate);
+        java.sql.Date sqlDepartureDate = convertStringToSqlDate(departureDate);
+
+        // Insert into reservation using stored procedure and get reservation ID
+        int reservationID;
+        try (CallableStatement csReservation = con.prepareCall("{call insert_new_reservation(?,?,?,?,?,?,?,?)}")) {
+            csReservation.setInt(1, customerID);
+            csReservation.setInt(2, hotelID);
+            csReservation.setInt(3, roomTypeID);
+            csReservation.setInt(4, numOfGuests);
+            csReservation.setDate(5, sqlArrivalDate);
+            csReservation.setDate(6, sqlDepartureDate);
+            csReservation.setString(7, reservationStatus);
+            csReservation.registerOutParameter(8, Types.INTEGER);
+            csReservation.execute();
+            reservationID = csReservation.getInt(8);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // Insert into payment using stored procedure and get payment ID
+        int paymentID;
+        try (CallableStatement csPayment = con.prepareCall("{call insert_new_payment(?,?,?,?,?,?)}")) {
+            csPayment.setInt(1, customerID);
+            csPayment.setInt(2, reservationID);
+            csPayment.setDouble(3, bookingPrice);
+            csPayment.setInt(4, numOfPointsUsed);
+            csPayment.setDate(5, sqlPaymentDate);
+            csPayment.registerOutParameter(6, Types.INTEGER);
+            csPayment.execute();
+            paymentID = csPayment.getInt(6);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // If paymentID > 0, return true, else return false.
+        return paymentID > 0;
+    }
+
+    // Create a new membership and insert it into the database, then return the generated membership ID
+    public static int createNewMembership(Connection con) {
+        int membershipID = -1;
+
+        // Call the stored procedure to insert a new membership with random points (0 to 10)
+        String storedProcCall = "{call insert_new_membership(?)}";
+        try (CallableStatement cstmt = con.prepareCall(storedProcCall)) {
+            
+            // Register the output parameter for the generated membership ID
+            cstmt.registerOutParameter(1, Types.INTEGER);
+
+            // Execute the stored procedure
+            cstmt.executeUpdate();
+
+            // Retrieve the generated membership ID
+            membershipID = cstmt.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return membershipID;
+    }
+
+   // Create a new address and add it to the database.
+    public static int createNewAddress(Connection con, Scanner myScanner) {
+        int addressID = -1;
+        // Request the address information from the user
+        System.out.print("Enter street: ");
+        String street = myScanner.nextLine();
+
+        System.out.print("Enter city: ");
+        String city = myScanner.nextLine();
+
+        System.out.print("Enter state: ");
+        String state = myScanner.nextLine();
+
+        // Get the postal code (American Zip Code), loop until the user provides the correct information
+        System.out.print("Enter postal code (American Zip Code, e.g. 12345 or 12345-6789): ");
+        String postalCode = myScanner.nextLine();
+        Pattern zipPattern = Pattern.compile("^\\d{5}(-\\d{4})?$");
+
+        while (!zipPattern.matcher(postalCode).matches()) {
+            System.out.println("Invalid Zip Code format. Please try again.");
+            System.out.print("Enter postal code (American Zip Code, e.g. 12345 or 12345-6789): ");
+            postalCode = myScanner.nextLine();
+        }
+
+        // Call the stored procedure to insert the address into the table
+        String storedProcCall = "{call insert_new_address(?, ?, ?, ?,?)}";
+        try (CallableStatement cstmt = con.prepareCall(storedProcCall)) {
+
+            cstmt.setString(1, street);
+            cstmt.setString(2, city);
+            cstmt.setString(3, state);
+            cstmt.setString(4, postalCode);
+            cstmt.registerOutParameter(5, Types.INTEGER);
+            cstmt.executeUpdate();
+
+            // Retrieve the generated addressID
+            addressID = cstmt.getInt(5);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return addressID;
+    }
+
+    //create and inserta nwe card into the database. Remember cardID autoincrements
+    public static int createNewCard(Connection con, Scanner myScanner) {
+        int cardID = -1;
+    
+        // Request card information from the user
+        System.out.print("Enter card token: ");
+        String cardToken = myScanner.nextLine();
+    
+        System.out.print("Enter card type: ");
+        String cardType = myScanner.nextLine();
+    
+        // Use the getDate() function to get a valid date from the user
+        System.out.print("Enter card expiration date (YYYY-MM-DD): ");
+        String expirationDateString = getDate(myScanner);
+        LocalDate expirationDate = LocalDate.parse(expirationDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    
+        // Call the stored procedure to insert the card into the table
+        String storedProcCall = "{call insert_new_card(?, ?, ?, ?)}";
+        try (CallableStatement cstmt = con.prepareCall(storedProcCall)) {
+    
+            cstmt.setString(1, cardToken);
+            cstmt.setString(2, cardType);
+            cstmt.setObject(3, expirationDate);
+            cstmt.registerOutParameter(4, Types.INTEGER);
+    
+            cstmt.executeUpdate();
+    
+            // Retrieve the generated cardID
+            cardID = cstmt.getInt(4);
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return cardID;
+    }
+    
+    // create a new customer and return the customerID of the new customer
+    public static int createNewCustomer(Connection con, Scanner myScanner) {
+        //arbitraruy customerID
+        int customerID = -1;
+
+        //create a customer object
+        Customer newCustomer = new Customer();
+
+        try {
+            
+            //insert new member into the frequent flyer program
+            int membershipID = createNewMembership(con);
+            System.out.println("You have been added to the Frequest Guests, and you were rewarded with some points!\n");
+
+            //insert new address and return the addressID
+            System.out.println("Enter your permanent address in the following section: \n");
+            int addressID = createNewAddress(con, myScanner);
+            System.out.println("Your address has been added successfully.\n");
+
+            //insert new card information and return the cardID
+            System.out.println("Enter your credit card/debit card information in the following section: \n");
+            int cardID = createNewCard(con, myScanner);
+            System.out.println("Your credit card/debit card information has been added successfully.\n");
+
+            // Get the customer first name
+            System.out.print("Enter first name: ");
+            newCustomer.setFirstName(myScanner.nextLine());
+
+            // Get the customer last name
+            System.out.print("Enter last name: ");
+            newCustomer.setLastName(myScanner.nextLine());
+
+            // Get the customer phone number, loop until the user provides the correct information
+            System.out.print("Enter phone number (US format, e.g. +1(123)-456-7890): ");
+            String phoneNumber = myScanner.nextLine();
+            Pattern phonePattern = Pattern.compile("^\\+1\\(\\d{3}\\)-\\d{3}-\\d{4}$");
+
+            while (!phonePattern.matcher(phoneNumber).matches()) {
+                System.out.println("Invalid phone number format. Please try again.");
+                System.out.print("Enter phone number (US format, e.g. +1(123)-456-7890): ");
+                phoneNumber = myScanner.nextLine();
+            }
+
+            //assign all customer attributes
+            newCustomer.setPhoneNumber(phoneNumber);
+            newCustomer.setAddressID(addressID);
+            newCustomer.setCardID(cardID);
+            newCustomer.setMembershipID(membershipID);
+
+            // Call the stored procedure to insert the customer into the database
+            String storedProcCall = "{call insert_new_customer(?, ?, ?, ?, ?, ?, ?)}";
+            try (CallableStatement cstmt = con.prepareCall(storedProcCall)) {
+                cstmt.setString(1, newCustomer.getFirstName());
+                cstmt.setString(2, newCustomer.getLastName());
+                cstmt.setString(3, newCustomer.getPhoneNumber());
+                cstmt.setInt(4, newCustomer.getCardID());
+                cstmt.setInt(5, newCustomer.getAddressID());
+                cstmt.setInt(6, newCustomer.getMembershipID());
+                cstmt.registerOutParameter(7, Types.INTEGER);
+
+                cstmt.executeUpdate();
+
+                // Get the generated customer ID from the stored procedure
+                customerID = cstmt.getInt(7);
+            } 
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Return the generated customer ID
+        return customerID;
     }
 
     //function to calcluate the discount
@@ -401,7 +653,7 @@ public class CustomerOnlineReservation {
     public static int getCustomerID(Scanner myScanner) {
         int inputCustomerID;
     
-        System.out.print("\nEnter your Customer ID (must be an integer greater than or equal to 0): ");
+        System.out.print("\nEnter your Customer ID (must be an integer greater than or equal to 0. Use 9999 if you don't have.): ");
         while (true) {
             try {
                 inputCustomerID = Integer.parseInt(myScanner.nextLine());
@@ -669,47 +921,6 @@ public class CustomerOnlineReservation {
             }
         }
         return userInput;
-    }
-
-    // create a new customer
-    public static boolean createNewCustomer() {
-        // request the information of a customer
-        // add the customer to the list of customers
-        return true;
-    }
-
-    // make a reservation for a specific customer
-    public static boolean makeReservation() {
-
-        // fetch customer information
-
-        // check whether they have points or not
-
-        // make the payment
-
-        // intiate a reservation
-
-        // display whether the reervation was successful or not
-        return true;
-    }
-
-    // get the number of points the particular customer has
-    public static int getNumberOfPoints() {
-
-        // get the customer information
-
-        // get the number of points
-
-        // return the number of points
-        return 0;
-    }
-
-    // calculate the quivalent of the amount of points
-    public static double getAmountEquivalentToPoints() {
-        // calculate the amount based on the number of points * fixed rate
-
-        // return the amount
-        return 0;
     }
 
     // function to get date

@@ -1,0 +1,15 @@
+CREATE OR REPLACE PROCEDURE insert_new_card (
+    p_cardToken      IN CreditCard.cardToken%TYPE,
+    p_cardType       IN CreditCard.cardType%TYPE,
+    p_expirationDate IN CreditCard.expirationDate%TYPE,
+    p_cardID         OUT CreditCard.cardID%TYPE
+)
+IS
+BEGIN
+    INSERT INTO CreditCard (cardToken, cardType, expirationDate)
+    VALUES (p_cardToken, p_cardType, p_expirationDate)
+    RETURNING cardID INTO p_cardID;
+
+    COMMIT;
+END;
+/

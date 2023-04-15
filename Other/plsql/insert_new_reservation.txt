@@ -1,0 +1,19 @@
+-- Create a stored procedure for inserting a new reservation and returning its ID
+CREATE OR REPLACE PROCEDURE insert_new_reservation
+(
+    p_customerID IN Reservation.customerID%TYPE,
+    p_hotelID IN Reservation.hotelID%TYPE,
+    p_roomTypeID IN Reservation.roomTypeID%TYPE,
+    p_numberOfGuests IN Reservation.numberOfGuests%TYPE,
+    p_arrivalDate IN Reservation.arrivalDate%TYPE,
+    p_departureDate IN Reservation.departureDate%TYPE,
+    p_reservationStatus IN Reservation.reservationStatus%TYPE,
+    o_reservationID OUT Reservation.reservationID%TYPE
+)
+IS
+BEGIN
+    INSERT INTO Reservation (customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus)
+    VALUES (p_customerID, p_hotelID, p_roomTypeID, p_numberOfGuests, p_arrivalDate, p_departureDate, p_reservationStatus)
+    RETURNING reservationID INTO o_reservationID;
+END;
+/

@@ -1,0 +1,16 @@
+CREATE OR REPLACE PROCEDURE insert_new_address (
+    p_street      IN Address.street%TYPE,
+    p_city        IN Address.city%TYPE,
+    p_state       IN Address.state%TYPE,
+    p_zipCode     IN Address.zipCode%TYPE,
+    p_addressID   OUT Address.addressID%TYPE
+)
+IS
+BEGIN
+    INSERT INTO Address (street, city, state, zipCode)
+    VALUES (p_street, p_city, p_state, p_zipCode)
+    RETURNING addressID INTO p_addressID;
+
+    COMMIT;
+END;
+/
