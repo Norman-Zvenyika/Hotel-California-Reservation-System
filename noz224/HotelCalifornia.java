@@ -56,7 +56,7 @@ public class HotelCalifornia {
                             break;
                         case 4:
                             System.out.println("\nBusiness Manager Interface\n");
-                            //CustomerOnlineReservation.startMenu();
+                            BusinessManager.mainMenu(con, s, myScanner);
                             break;
                         case 5:
                             System.out.println("\nProgram closing.......\n");

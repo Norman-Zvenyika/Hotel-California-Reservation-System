@@ -1,0 +1,26 @@
+CREATE OR REPLACE PROCEDURE upsert_room_rate(
+    p_roomRateID IN RoomRate.roomRateID%TYPE,
+    p_roomTypeID IN RoomRate.roomTypeID%TYPE,
+    p_managerID IN RoomRate.managerID%TYPE,
+    p_startDate IN RoomRate.startDate%TYPE,
+    p_endDate IN RoomRate.endDate%TYPE,
+    p_price IN RoomRate.price%TYPE,
+    p_success OUT INTEGER
+) AS
+BEGIN
+    MERGE INTO RoomRate rr
+    USING (SELECT p_roomRateID AS roomRateID, p_roomTypeID AS roomTypeID, p_startDate AS startDate, p_endDate AS endDate
+           FROM dual) new_rr
+    ON (rr.roomRateID = new_rr.roomRateID)
+    WHEN MATCHED THEN
+        UPDATE SET rr.roomTypeID = p_roomTypeID, rr.managerID = p_managerID, rr.startDate = p_startDate, rr.endDate = p_endDate, rr.price = p_price
+    WHEN NOT MATCHED THEN
+        INSERT (roomTypeID, managerID, startDate, endDate, price)
+        VALUES (p_roomTypeID, p_managerID, p_startDate, p_endDate, p_price);
+    COMMIT;
+    p_success := 1; -- success represented by 1
+EXCEPTION
+    WHEN OTHERS THEN
+        p_success := 0; -- failure represented by 0
+END upsert_room_rate;
+/
