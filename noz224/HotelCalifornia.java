@@ -1,7 +1,4 @@
-import java.util.InputMismatchException;
 import java.util.Scanner;
-import java.util.regex.Pattern;
-import java.io.*;
 import java.sql.*;
 
 public class HotelCalifornia {
@@ -35,7 +32,7 @@ public class HotelCalifornia {
                 ) 
             {
                 //printout status connection
-                System.out.println("Welcome to Hotel California "+userName+"!\n");
+                System.out.println("\nWelcome to Hotel California "+userName+"!\n");
 
                 //continue loop to provide options until the user terminates the program
                 boolean exit = false;
@@ -46,23 +43,23 @@ public class HotelCalifornia {
 
                     switch(option) {
                         case 1:
-                            System.out.println("Customer online reservation access\n");
+                            System.out.println("\nCustomer Online Reservation Access Interface\n");
                             CustomerOnlineReservation.mainMenu(con,s, myScanner);
                             break;
                         case 2:
-                            System.out.println("Front-desk agent\n");
-                            //CustomerOnlineReservation.startMenu();
+                            System.out.println("\nFront Desk Agent Interface\n");
+                            FrontDeskAgent.mainMenu(con, s, myScanner);
                             break;
                         case 3:
-                            System.out.println("Housekeeping\n");
+                            System.out.println("\nHousekeeping Interface\n");
                             //CustomerOnlineReservation.startMenu();
                             break;
                         case 4:
-                            System.out.println("Business manager\n");
+                            System.out.println("\nBusiness Manager Interface\n");
                             //CustomerOnlineReservation.startMenu();
                             break;
                         case 5:
-                            System.out.println("Program closing.......\n");
+                            System.out.println("\nProgram closing.......\n");
                             exit = true;
                             break;
                     }
@@ -128,6 +125,7 @@ public class HotelCalifornia {
         //loop for options
         while(validOption==false){
             //print possible options
+            System.out.println("\nHotel California Main Menu: \n");
             System.out.println( "1. Customer online reservation access\n" +
                             "2. Front-desk agent\n" +
                             "3. Housekeeping\n" +

@@ -1,0 +1,28 @@
+CREATE OR REPLACE PROCEDURE UPDATE_ROOM_STATUS(
+    p_hotelID IN Room.hotelID%TYPE,
+    p_roomTypeID IN Room.roomTypeID%TYPE,
+    p_roomID IN Room.roomID%TYPE,
+    p_roomStatus IN Room.roomStatus%TYPE,
+    p_result OUT INTEGER
+) AS
+BEGIN
+    -- Update the room status of the selected room to the desired roomStatus
+    UPDATE Room
+    SET roomStatus = p_roomStatus
+    WHERE roomID = p_roomID
+    AND roomTypeID = p_roomTypeID
+    AND hotelID = p_hotelID;
+
+    -- Check if the update was successful and set the result accordingly
+    IF SQL%ROWCOUNT > 0 THEN
+        p_result := 1;
+        COMMIT;
+    ELSE
+        p_result := 0;
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        p_result := 0;
+        RAISE;
+END UPDATE_ROOM_STATUS;

@@ -137,7 +137,7 @@ public class CustomerOnlineReservation {
     }
 
     //format the date for SQL
-    private static java.sql.Date convertStringToSqlDate(String dateString) {
+    public static java.sql.Date convertStringToSqlDate(String dateString) {
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             java.util.Date parsedDate = format.parse(dateString);

@@ -14,9 +14,11 @@ DROP TRIGGER customer_bir;
 DROP TRIGGER membership_bir;
 DROP TRIGGER credit_card_bir;
 DROP TRIGGER address_bir;
+DROP TRIGGER customerRoom_bir;
 
 -- Drop tables
 DROP TABLE Payment CASCADE CONSTRAINTS;
+DROP TABLE CustomerRoom CASCADE CONSTRAINTS;
 DROP TABLE Reservation CASCADE CONSTRAINTS;
 DROP TABLE Room CASCADE CONSTRAINTS;
 DROP TABLE RoomRate CASCADE CONSTRAINTS;
@@ -42,6 +44,7 @@ DROP SEQUENCE customer_seq;
 DROP SEQUENCE credit_card_seq;
 DROP SEQUENCE membership_seq;
 DROP SEQUENCE address_seq;
+DROP SEQUENCE customerRoom_seq;
 commit;
 
 -- Create sequences
@@ -344,6 +347,29 @@ FOR EACH ROW
 BEGIN
   SELECT room_rate_seq.NEXTVAL
   INTO   :new.roomRateID
+  FROM   dual;
+END;
+/
+
+-----CustomerRoom------
+CREATE SEQUENCE customerRoom_seq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE CustomerRoom (
+    customerRoomID INT PRIMARY KEY AUTO_INCREMENT,
+    reservationID INT NOT NULL,
+    roomID INT NOT NULL,
+    checkInDate DATE NOT NULL,
+    checkOutDate DATE,
+    FOREIGN KEY (reservationID) REFERENCES Reservation(reservationID),
+    FOREIGN KEY (roomID) REFERENCES Room(roomID)
+);
+
+CREATE OR REPLACE TRIGGER customerRoom_bir
+BEFORE INSERT ON CustomerRoom
+FOR EACH ROW
+BEGIN
+  SELECT customerRoom_seq.NEXTVAL
+  INTO   :new.customerRoomID
   FROM   dual;
 END;
 /
