@@ -1,4 +1,7 @@
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
@@ -14,6 +17,27 @@ public class BusinessManager {
         
         //perform the operation
         if (option==1) {
+
+            java.sql.Date startDate;
+            java.sql.Date endDate;
+            do {
+                System.out.print("\nEnter the start date (yyyy-mm-dd): ");
+                String startDateInput = getDate(myScanner);
+                startDate = CustomerOnlineReservation.convertStringToSqlDate(startDateInput);
+    
+                System.out.print("Enter the end date (yyyy-mm-dd): ");
+                String endDateInput = getDate(myScanner);
+                endDate = CustomerOnlineReservation.convertStringToSqlDate(endDateInput);
+    
+                if (endDate.before(startDate)) {
+                    System.out.println("End date must be equal to or greater than the start date. Please try again.");
+                }
+            } while (endDate.before(startDate));
+    
+    
+            // Call aggregate functions
+            getOccupancyRateOverTime(con, new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()));
+            getTotalRevenuesOverTime(con, new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime())); 
 
         }
         else {
@@ -34,6 +58,85 @@ public class BusinessManager {
         }
 
     }
+
+    public static void getOccupancyRateOverTime(Connection con, Timestamp startDate, Timestamp endDate) {
+        String sql = "SELECT h.hotelID, h.hotelName AS name, COUNT(cr.roomID) AS occupied_rooms, COUNT(r.roomID) AS total_rooms, " +
+                     "CAST(COUNT(cr.roomID) AS FLOAT) / COUNT(r.roomID) * 100 AS occupancy_rate " +
+                     "FROM Hotel h " +
+                     "JOIN Room r ON h.hotelID = r.hotelID " +
+                     "LEFT JOIN CustomerRoom cr ON r.roomID = cr.roomID AND cr.checkInDate >= ? AND (cr.checkOutDate <= ? OR cr.checkOutDate IS NULL) " +
+                     "GROUP BY h.hotelID, h.hotelName " +
+                     "ORDER BY h.hotelID";
+    
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setTimestamp(1, startDate);
+            stmt.setTimestamp(2, endDate);
+            ResultSet rs = stmt.executeQuery();
+    
+            System.out.println("\nOccupancy Rates Over Time:");
+            System.out.printf("%-10s %-30s %-20s %-20s %-20s%n", "HotelID", "Hotel Name", "Occupied Rooms", "Total Rooms", "Occupancy Rate (%)");
+            while (rs.next()) {
+                System.out.printf("%-10d %-30s %-20d %-20d %-20.2f%n",
+                        rs.getInt("hotelID"), rs.getString("name"), rs.getInt("occupied_rooms"), rs.getInt("total_rooms"),
+                        rs.getDouble("occupancy_rate"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void getTotalRevenuesOverTime(Connection con, Timestamp startDate, Timestamp endDate) {
+        String sql = "SELECT h.hotelID, h.hotelName, SUM(p.amount) AS total_revenue " +
+             "FROM Hotel h " +
+             "JOIN Room r ON h.hotelID = r.hotelID " +
+             "JOIN CustomerRoom cr ON r.roomID = cr.roomID " +
+             "JOIN Payment p ON cr.reservationID = p.reservationID " +
+             "WHERE p.paymentDate >= ? AND p.paymentDate <= ? " +
+             "GROUP BY h.hotelID, h.hotelName " +
+             "ORDER BY h.hotelID";
+    
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setTimestamp(1, startDate);
+            stmt.setTimestamp(2, endDate);
+            ResultSet rs = stmt.executeQuery();
+    
+            System.out.println("\nTotal Revenues Over Time:");
+            System.out.printf("%-10s %-30s %-20s%n", "HotelID", "Hotel Name", "Total Revenue ($)");
+            while (rs.next()) {
+                System.out.printf("%-10d %-30s %-20.2f%n",
+                        rs.getInt("hotelID"), rs.getString("hotelName"), rs.getDouble("total_revenue"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // function to get date
+    public static String getDate(Scanner myScanner) {
+        // Set date format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    
+        String date;
+    
+        // Keep asking the user for a date input until a valid date is provided
+        while (true) {
+            try {
+                // Read user input and attempt to parse it as a LocalDate
+                date = myScanner.nextLine();
+                LocalDate parsedDate = LocalDate.parse(date, formatter);
+                // If the date is valid, break out of the loop
+                break;
+            } catch (DateTimeParseException e) {
+                // If the input is not in the correct format, show an error message and ask for
+                // input again
+                System.out.println("Invalid date format. Please enter a valid date in the format YYYY-MM-DD.");
+            }
+        }
+    
+        // Return the valid date as a String
+        return date;
+    }
+    
 
     //function to set rate
     public static boolean setRates(Connection con, int managerID, Scanner myScanner) {
