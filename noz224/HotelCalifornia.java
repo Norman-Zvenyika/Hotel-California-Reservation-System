@@ -95,56 +95,69 @@ public class HotelCalifornia {
         System.out.println("Thank you for choosing Hotel California. Goodbye!");
     }
 
-    //request user name and password from the suer
+    /**
+    * Requests the user's Oracle username and password.
+    *
+    * @param myScanner the Scanner object used for reading input
+    * @return an array containing the user's Oracle username and password
+    */
     public static String[] getCredentials(Scanner myScanner) {
         
-        //create an array for username and password
-        String [] userCredentials = new String [2];
+        // Create an array for the username and password
+        String[] userCredentials = new String[2];
 
-        //request for username
+        // Request the username
         System.out.print("\nEnter your Oracle username: ");
         userCredentials[0] = myScanner.nextLine();
-     
-        //request password
+    
+        // Request the password
         System.out.print("Enter your Oracle user password: ");
         userCredentials[1] = myScanner.nextLine();
 
-        //return user credentials
+        // Return user credentials
         return userCredentials;
     }
+    
 
-    //print options to the user
+   /**
+    * Prints the main menu options for the Hotel California application and
+    * validates the user's input.
+    *
+    * @param myScanner the Scanner object used for reading input
+    * @return an integer representing the user's valid menu option
+    */
     public static int printOptions(Scanner myScanner) {
         
-        //validate the option
+        // Validate the option
         boolean validOption = false;
 
-        //useroption
+        // User option
         String userOption = "";
 
-        //loop for options
-        while(validOption==false){
-            //print possible options
+        // Loop for options
+        while (!validOption) {
+            // Print possible options
             System.out.println("\nHotel California Main Menu: \n");
-            System.out.println( "1. Customer online reservation access\n" +
+            System.out.println("1. Customer online reservation access\n" +
                             "2. Front-desk agent\n" +
                             "3. Housekeeping\n" +
                             "4. Business manager\n" +
                             "5. Exit \n");
 
-            System.out.print("Enter an option (1-4): ");
+            System.out.print("Enter an option (1-5): ");
             userOption = myScanner.nextLine();
 
-            //validate the option
-            if(userOption.matches("^[1-5]$")) {
+            // Validate the option
+            if (userOption.matches("^[1-5]$")) {
                 validOption = true;
-            }
+            } 
             else {
                 System.out.println("Invalid option.");
             }
         }
 
-        //return the option
+        // Return the option
         return Integer.parseInt(userOption);
     }
+
 }
