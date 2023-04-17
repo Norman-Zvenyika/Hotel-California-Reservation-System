@@ -52,7 +52,7 @@ public class HotelCalifornia {
                             break;
                         case 3:
                             System.out.println("\nHousekeeping Interface\n");
-                            //CustomerOnlineReservation.startMenu();
+                            Housekeeping.mainMenu(con, s, myScanner);
                             break;
                         case 4:
                             System.out.println("\nBusiness Manager Interface\n");
