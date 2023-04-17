@@ -1,3 +1,4 @@
+import java.sql.Date;
 /**
  * Reservation class represents a reservation in the hotel management system.
  */

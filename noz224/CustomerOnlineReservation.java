@@ -113,25 +113,29 @@ public class CustomerOnlineReservation {
 
                 }
                 else if(customerStatus==0) {
-                    System.out.println("\nYour account was  not found. Let us create a new account for you.\n");
+                    
+                    System.out.print("\nYour account was not found. Do you want to create an account with us? (Y/N): ");
+                    
+                    String createAcc = getYesOrNoInput(myScanner);
 
-                    //request their personal information
-                    int newCustomerID = createNewCustomer(con, myScanner);
+                    if(createAcc.equals("Y")) {
+                        //request their personal information
+                        int newCustomerID = createNewCustomer(con, myScanner);
 
-                    System.out.println("\nYou a now a customer of Hotel California!\n");
+                        System.out.println("\nYou a now a customer of Hotel California!\n");
 
-                    System.out.println("Here are your customer details: ");
-                    Customer customerInfo = getCustomerInformation(con,newCustomerID);
-                    System.out.println("First Name: "+ customerInfo.getFirstName());
-                    System.out.println("Last Name: "+ customerInfo.getLastName());
-                    System.out.println("CustomerID: "+ customerInfo.getCustomerID());
-                    System.out.println("MembershipID: "+ customerInfo.getMembershipID());
-                    System.out.println("Phone number: "+ customerInfo.getPhoneNumber());
-                    System.out.println("");
+                        System.out.println("Here are your customer details: ");
+                        Customer customerInfo = getCustomerInformation(con,newCustomerID);
+                        System.out.println("First Name: "+ customerInfo.getFirstName());
+                        System.out.println("Last Name: "+ customerInfo.getLastName());
+                        System.out.println("CustomerID: "+ customerInfo.getCustomerID());
+                        System.out.println("MembershipID: "+ customerInfo.getMembershipID());
+                        System.out.println("Phone number: "+ customerInfo.getPhoneNumber());
+                        System.out.println("");
 
-                    //complete the reservation
-                    reservationComplete  = makeReservation(con,newCustomerID,arrivalDate,departureDate,roomTypeID, myScanner, numberOfGuests, userHotelID); 
-
+                        //complete the reservation
+                        reservationComplete  = makeReservation(con,newCustomerID,arrivalDate,departureDate,roomTypeID, myScanner, numberOfGuests, userHotelID); 
+                    }
                 }
             }
         }
@@ -140,7 +144,7 @@ public class CustomerOnlineReservation {
             System.out.println("\nThe reservation has been completed succesfully.\n");
         }
         else {
-            System.out.println("\nReservation failed. Try again\n");
+            System.out.println("\nReservation cancelled. Try again.\n");
         }
     }
 
@@ -659,22 +663,28 @@ public class CustomerOnlineReservation {
 
     //get customerID
     public static int getCustomerID(Scanner myScanner) {
-        int inputCustomerID;
-    
-        System.out.print("\nEnter your Customer ID (must be an integer greater than or equal to 0. Use 9999 if you don't have.): ");
-        while (true) {
-            try {
-                inputCustomerID = Integer.parseInt(myScanner.nextLine());
-                if (inputCustomerID >= 0) {
-                    break;
-                } else {
-                    System.out.println("Customer ID must be greater than or equal to 0. Please enter a valid Customer ID:");
+        int inputCustomerID = -1;
+
+        //ask if they have customer ID
+        System.out.print("\nDo you have a customer ID? (Y/N): ");
+
+        String response = getYesOrNoInput(myScanner); 
+
+        if(response.equals("Y")) {
+            System.out.print("\nEnter your Customer ID (must be an integer greater than or equal to 0): ");
+            while (true) {
+                try {
+                    inputCustomerID = Integer.parseInt(myScanner.nextLine());
+                    if (inputCustomerID >= 0) {
+                        break;
+                    } else {
+                        System.out.println("Customer ID must be greater than or equal to 0. Please enter a valid Customer ID:");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input. Please enter a valid Customer ID:");
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid Customer ID:");
             }
         }
-    
         return inputCustomerID;
     }
 
@@ -820,13 +830,13 @@ public class CustomerOnlineReservation {
         }
 
         //request hotelID from the user
-        System.out.print("\nEnter the hotel ID from the list: ");
+        System.out.print("\nEnter the hotel ID from the list given above: ");
         AtomicInteger selectedHotelID = new AtomicInteger(myScanner.nextInt());
         myScanner.nextLine(); // Consume newline character
 
         // Validate the entered hotel ID
         while (hotelList.stream().noneMatch(hotel -> hotel.getKey() == selectedHotelID.get())) {
-            System.out.print("Invalid hotel ID. Please enter a hotel ID from the list: ");
+            System.out.print("Invalid hotel ID. Please enter a hotel ID from the list given above: ");
             selectedHotelID.set(Integer.parseInt(myScanner.nextLine()));
         }
 
@@ -838,6 +848,8 @@ public class CustomerOnlineReservation {
     public static int getRoomTypeID(Connection con, Scanner myScanner, int hotelID, String arrivalDate, String departureDate, int numberOfGuests) {
 
         Map<Integer, Integer> roomTypeMaxGuests = new HashMap<>();
+        Map<Integer, Integer> availableRoomTypeMaxGuests = new HashMap<>();
+        Map<Integer, String> roomTypeDescriptions = new HashMap<>();
 
         // display all room types available in the hotel during the particular time period
         String roomTypesQuery = "WITH reserved_roomtypes AS (" +
@@ -855,6 +867,9 @@ public class CustomerOnlineReservation {
         "FROM available_rooms ar " +
         "ORDER BY ar.roomTypeID";
 
+        //set a boolean variable to see if the user gets any room
+        boolean freeRoomType = false;
+
         // Prepare the statement to view the available roomtypes
         try (PreparedStatement pstmt = con.prepareStatement(roomTypesQuery)) {
             // Set the parameters
@@ -864,22 +879,38 @@ public class CustomerOnlineReservation {
             pstmt.setInt(4, hotelID);
 
              // Execute the query and process the results
+            boolean freeRoomTypeFound = false;
             try (ResultSet rs = pstmt.executeQuery()) {
-                System.out.println("\nThe available roomtypes are : ");
                 while (rs.next()) {
+                    
                     // Get the room type details from the current row
                     int roomTypeID = rs.getInt("roomTypeID");
                     String description = rs.getString("description");
                     int maxGuests = rs.getInt("maxGuests");
 
-                    // Store the maxGuests for each roomTypeID
+                    // Store the room type details
                     roomTypeMaxGuests.put(roomTypeID, maxGuests);
+                    roomTypeDescriptions.put(roomTypeID, description);
 
-                    // Print the room type details
-                    System.out.println("\nRoom Type ID: " + roomTypeID);
-                    System.out.println("Description: " + description);
-                    System.out.println("Max Guests: " + maxGuests);
-                    System.out.println();
+                    //print the availbale roomtype based on the user number of guests
+                    if(numberOfGuests<=maxGuests) {
+
+                        //for printing the heading before showing the available roomtypes
+                        if(freeRoomTypeFound==false) {
+                            System.out.println("\nThe available roomtypes are : ");
+                            freeRoomTypeFound = true;
+                        }
+
+                        // Store the maxGuests for each roomTypeID
+                        availableRoomTypeMaxGuests.put(roomTypeID, maxGuests);
+
+                        // Print the room type details
+                        System.out.println("\nRoom Type ID: " + roomTypeID);
+                        System.out.println("Description: " + description);
+                        System.out.println("Max Guests: " + maxGuests);
+                        System.out.println();
+                        freeRoomType = true;
+                    }
                 }
             }
             catch (SQLException e) {
@@ -892,30 +923,48 @@ public class CustomerOnlineReservation {
             return -1;
         }
 
-
-        System.out.print("Please enter a Room Type ID from the list above, ensuring that the number of guests does not exceed the maximum for the room type: ");
-
         int selectedRoomTypeID = -1;
-        while (true) {
-            selectedRoomTypeID = Integer.parseInt(myScanner.nextLine());
-    
-            if (!roomTypeMaxGuests.containsKey(selectedRoomTypeID)) {
-                System.out.print("\nInvalid Room Type ID. Please enter a valid Room Type ID from the list above: ");
-            } else if (numberOfGuests > roomTypeMaxGuests.get(selectedRoomTypeID)) {
-                System.out.println("\nThe number of guests exceeds the maximum allowed for the selected room type.\n");
-                System.out.print("Do you want to change your number of guests? (Y/N) ");
-                String userResponse = getYesOrNoInput(myScanner);
-                if(userResponse.equals("Y")) {
-                    return -4;
-                }
-                else {
-                    return -1;
-                }
-            } else {
-                break;
+
+        if(freeRoomType==false) {
+            System.out.println("\nThe number of guests exceeds the maximum allowed for the available room types.\n");
+            System.out.println("Below is a list of all available roomtypes, but you need to change the number of guests to select any of them.");
+
+            // Print out all available room types for the user to see
+            for (Map.Entry<Integer, String> entry : roomTypeDescriptions.entrySet()) {
+                int roomTypeID = entry.getKey();
+                String description = entry.getValue();
+                int maxGuests = roomTypeMaxGuests.get(roomTypeID);
+
+                System.out.println("\nRoom Type ID: " + roomTypeID);
+                System.out.println("Description: " + description);
+                System.out.println("Max Guests: " + maxGuests);
+                System.out.println();
+            }
+
+            //prompt the user if they want to change their number of guests
+            System.out.print("Do you want to change your number of guests? (Y/N) ");
+            String userResponse = getYesOrNoInput(myScanner);
+
+            //if the user says yes, return -4. We will use -4 as a code to allow the user to renter number of guests
+            if(userResponse.equals("Y")) {
+                return -4;
+            }
+            else {
+                return -1;
             }
         }
-    
+        else {
+            System.out.print("Please enter a Room Type ID from the list above: ");
+            while (true) {
+                selectedRoomTypeID = Integer.parseInt(myScanner.nextLine());
+                if (!availableRoomTypeMaxGuests.containsKey(selectedRoomTypeID)) {
+                    System.out.print("\nInvalid Room Type ID. Please enter a valid Room Type ID from the list above: ");
+                }
+                else {
+                    break;
+                } 
+            }
+        }
         return selectedRoomTypeID;
     }
 
@@ -928,7 +977,7 @@ public class CustomerOnlineReservation {
             if (userInput.equals("Y") || userInput.equals("N")) {
                 break;
             } else {
-                System.out.println("Invalid input. Please enter 'Y' or 'N':");
+                System.out.print("Invalid input. Please enter 'Y' or 'N':");
             }
         }
         return userInput;
