@@ -22,8 +22,8 @@ public class FrontDeskAgent {
             Reservation reservationDetails = getReservation(con, customerId);
 
             //if rervation is found, pull the room type, and hotelID
-            if(reservationDetails.getReservationID()==-1) {
-                System.out.println("\nThe customer has no active reservation\n");
+            if(reservationDetails.getReservationID()==-1 || !reservationDetails.getReservationStatus().equals("Confirmed")) {
+                System.out.println("\nThe customer has no confirmed reservation\n");
             }
             else {
                 //perform the actions according to check out or check in
@@ -309,26 +309,6 @@ public class FrontDeskAgent {
         }
 
         return customerID;
-    }
-
-    //function for checkin
-    public static void checkIn() {
-
-        //for a given hotel ID, use roomtype to identify a room for the customer
-
-        //set room status to Occupied
-
-        //return the room number
-
-        //let the user know that they have been setin.
-    }
-
-    //function for check out
-    public static void checkOut() {
-
-        //delete relevant entries
-
-        //setup a trigger that to mark the freed room as Ready to be cleaned
     }
 
     //print the menu and assk the front desk agent to enter the input
