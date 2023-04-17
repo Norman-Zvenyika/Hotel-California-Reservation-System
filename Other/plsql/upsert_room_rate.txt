@@ -5,13 +5,16 @@ CREATE OR REPLACE PROCEDURE upsert_room_rate(
     p_startDate IN RoomRate.startDate%TYPE,
     p_endDate IN RoomRate.endDate%TYPE,
     p_price IN RoomRate.price%TYPE,
-    p_success OUT INTEGER
+    p_success OUT INTEGER,
+    p_errorMessage OUT VARCHAR2
 ) AS
 BEGIN
     MERGE INTO RoomRate rr
     USING (SELECT p_roomRateID AS roomRateID, p_roomTypeID AS roomTypeID, p_startDate AS startDate, p_endDate AS endDate
            FROM dual) new_rr
-    ON (rr.roomRateID = new_rr.roomRateID)
+    ON (rr.roomRateID = new_rr.roomRateID
+        AND rr.roomTypeID = p_roomTypeID
+        AND (rr.startDate <= new_rr.endDate AND rr.endDate >= new_rr.startDate))
     WHEN MATCHED THEN
         UPDATE SET rr.roomTypeID = p_roomTypeID, rr.managerID = p_managerID, rr.startDate = p_startDate, rr.endDate = p_endDate, rr.price = p_price
     WHEN NOT MATCHED THEN

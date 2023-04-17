@@ -1,5 +1,9 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class BusinessManager {
@@ -45,14 +49,19 @@ public class BusinessManager {
                 hotelID = rs.getInt("hotelID");
             }
 
+            int roomRateID;
+            int roomTypeID;
+
             // Get all room types and room rate IDs for the specific hotel
             try (PreparedStatement stmt = con.prepareStatement(
                 "SELECT m.managerID, h.hotelID, rt.roomTypeID, rt.description, rr.roomRateID, rr.price, rr.startDate, rr.endDate " +
                 "FROM Hotel h, Room r, RoomType rt, RoomRate rr, Manager m " +
-                "WHERE h.hotelID = r.hotelID AND r.roomTypeID = rt.roomTypeID AND rt.roomTypeID = rr.roomTypeID AND h.hotelID = m.hotelID AND m.hotelID = ?")) {
+                "WHERE h.hotelID = r.hotelID AND r.roomTypeID = rt.roomTypeID AND rt.roomTypeID = rr.roomTypeID AND h.hotelID = m.hotelID AND m.hotelID = ?",
+                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+
                 stmt.setInt(1, hotelID);
                 ResultSet rs = stmt.executeQuery();
-
+                
                 System.out.println("\nRoom Types and Room Rates for your Hotel:");
                 System.out.printf("%-10s %-10s %-10s %-20s %-10s %-10s %-12s %-12s%n", "ManagerID", "HotelID", "RoomTypeID", "Description", "RoomRateID", "Price", "Start Date", "End Date");
                 while (rs.next()) {
@@ -60,15 +69,37 @@ public class BusinessManager {
                             rs.getInt("managerID"), rs.getInt("hotelID"), rs.getInt("roomTypeID"), rs.getString("description"), rs.getInt("roomRateID"),
                             rs.getDouble("price"), rs.getDate("startDate"), rs.getDate("endDate"));
                 }
+
+                // Close the first ResultSet and create a new PreparedStatement and ResultSet for validation
+                rs.close();
+                PreparedStatement stmtValidation = con.prepareStatement(
+                    "SELECT m.managerID, h.hotelID, rt.roomTypeID, rt.description, rr.roomRateID, rr.price, rr.startDate, rr.endDate " +
+                    "FROM Hotel h, Room r, RoomType rt, RoomRate rr, Manager m " +
+                    "WHERE h.hotelID = r.hotelID AND r.roomTypeID = rt.roomTypeID AND rt.roomTypeID = rr.roomTypeID AND h.hotelID = m.hotelID AND m.hotelID = ?");
+                stmtValidation.setInt(1, hotelID);
+                ResultSet rsValidation = stmtValidation.executeQuery();
+                List<Map<String, Object>> rows = resultSetToList(rsValidation);
+                rsValidation.close();
+                stmtValidation.close();
+
+                // Loop until a valid room rate ID and room type ID are provided
+                while (true) {
+                    // Get the room rate ID from the manager
+                    System.out.print("\nEnter the Room Rate ID: ");
+                    roomRateID = getIntegerInput(myScanner);
+
+                    // Get the room type ID from the manager
+                    System.out.print("Enter the Room Type ID: ");
+                    roomTypeID = getIntegerInput(myScanner);
+
+                    // Check if the rateId and roomtypeID are present in the results returned by the query
+                    if (isValidRoomRateIdAndRoomTypeId(rows, roomRateID, roomTypeID)) {
+                        break;
+                    } else {
+                        System.out.println("Invalid Room Rate ID or Room Type ID. Please try again.");
+                    }
+                }
             }
-
-            // Get the room rate ID from the manager
-            System.out.print("\nEnter the Room Rate ID: ");
-            int roomRateID = getIntegerInput(myScanner);
-
-            // Get the room type ID from the manager
-            System.out.print("Enter the Room Type ID: ");
-            int roomTypeID = getIntegerInput(myScanner);
 
             // Get the start date, end date, and price from the manager
             java.sql.Date startDate;
@@ -102,12 +133,54 @@ public class BusinessManager {
                 stmt.registerOutParameter(7, Types.INTEGER);
                 stmt.executeUpdate();
                 int success = stmt.getInt(7);
-                return success == 1;
+                if (success == 1) {
+                    return true;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static List<Map<String, Object>> resultSetToList(ResultSet rs) throws SQLException {
+        List<Map<String, Object>> result = new ArrayList<>();
+        ResultSetMetaData md = rs.getMetaData();
+        int columns = md.getColumnCount();
+        
+        while (rs.next()) {
+            Map<String, Object> row = new HashMap<>(columns);
+            for (int i = 1; i <= columns; ++i) {
+                row.put(md.getColumnName(i).toUpperCase(), rs.getObject(i));
+            }
+            result.add(row);
+        }
+        
+        return result;
+    }
+
+    public static boolean isValidRoomRateIdAndRoomTypeId(List<Map<String, Object>> rows, int roomRateID, int roomTypeID) {
+        boolean validRoomRateId = false;
+        boolean validRoomTypeId = false;
+    
+        for (Map<String, Object> row : rows) {
+            int currentRoomRateID = ((Number) row.get("ROOMRATEID")).intValue();
+            int currentRoomTypeID = ((Number) row.get("ROOMTYPEID")).intValue();
+    
+            if (currentRoomRateID == roomRateID) {
+                validRoomRateId = true;
+            }
+            if (currentRoomTypeID == roomTypeID) {
+                validRoomTypeId = true;
+            }
+    
+            // If both roomRateID and roomTypeID are valid, we can break the loop
+            if (validRoomRateId && validRoomTypeId) {
+                break;
+            }
+        }
+    
+        return validRoomRateId && validRoomTypeId;
     }
 
     //function to get new price
@@ -201,8 +274,4 @@ public class BusinessManager {
         //return the option
         return Integer.parseInt(userOption);
     }
-
-    //function to perform what ever needs to be viewed
-
-    //function to set rates
 }
