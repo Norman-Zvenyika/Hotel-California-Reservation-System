@@ -1,0 +1,165 @@
+CREATE OR REPLACE TRIGGER address_bir
+BEFORE INSERT ON Address
+FOR EACH ROW
+BEGIN
+  SELECT address_seq.NEXTVAL
+  INTO   :new.addressID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER membership_bir
+BEFORE INSERT ON Membership
+FOR EACH ROW
+BEGIN
+  SELECT membership_seq.NEXTVAL
+  INTO :new.membershipID
+  FROM dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER credit_card_bir
+BEFORE INSERT ON CreditCard
+FOR EACH ROW
+BEGIN
+  SELECT credit_card_seq.NEXTVAL
+  INTO   :new.cardID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER customer_bir
+BEFORE INSERT ON Customer
+FOR EACH ROW
+BEGIN
+SELECT customer_seq.NEXTVAL
+INTO :new.customerID
+FROM dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER hotel_bir
+BEFORE INSERT ON Hotel
+FOR EACH ROW
+BEGIN
+SELECT hotel_seq.NEXTVAL
+INTO :new.hotelID
+FROM dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER amenity_bir
+BEFORE INSERT ON Amenity
+FOR EACH ROW
+BEGIN
+  SELECT amenity_seq.NEXTVAL
+  INTO   :new.amenityID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER room_type_bir
+BEFORE INSERT ON RoomType
+FOR EACH ROW
+BEGIN
+  SELECT room_type_seq.NEXTVAL
+  INTO   :new.roomTypeID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER reservation_bir
+BEFORE INSERT ON Reservation
+FOR EACH ROW
+BEGIN
+  SELECT reservation_seq.NEXTVAL
+  INTO   :new.reservationID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER reservation_guests_check
+BEFORE INSERT ON Reservation
+FOR EACH ROW
+DECLARE
+  v_max_guests INT;
+BEGIN
+  SELECT maxGuests
+  INTO   v_max_guests
+  FROM   RoomType
+  WHERE  roomTypeID = :new.roomTypeID;
+
+  IF :new.numberOfGuests > v_max_guests THEN
+    RAISE_APPLICATION_ERROR(-20001, 'The number of guests exceeds the maximum number of guests allowed for the selected room type.');
+  END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER payment_bir
+BEFORE INSERT ON Payment
+FOR EACH ROW
+BEGIN
+  SELECT payment_seq.NEXTVAL
+  INTO   :new.paymentID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER payment_before_insert
+BEFORE INSERT ON Payment
+FOR EACH ROW
+BEGIN
+    :NEW.pointsUsed := COALESCE(:NEW.pointsUsed, 0);
+END;
+/
+
+CREATE OR REPLACE TRIGGER payment_points_update
+AFTER INSERT ON Payment
+FOR EACH ROW
+WHEN (NEW.pointsUsed > 0)
+BEGIN
+    UPDATE Membership
+    SET points = points - :NEW.pointsUsed
+    WHERE membershipID = :NEW.customerID;
+END;
+/
+
+CREATE OR REPLACE TRIGGER room_bir
+BEFORE INSERT ON Room
+FOR EACH ROW
+BEGIN
+  SELECT room_seq.NEXTVAL
+  INTO   :new.roomID
+  FROM   dual;
+END;
+/
+
+CREATE TRIGGER manager_bir
+BEFORE INSERT ON Manager
+FOR EACH ROW
+BEGIN
+  SELECT manager_seq.NEXTVAL
+  INTO   :new.managerID
+  FROM   dual;
+END;
+/
+
+CREATE TRIGGER room_rate_bir
+BEFORE INSERT ON RoomRate
+FOR EACH ROW
+BEGIN
+  SELECT room_rate_seq.NEXTVAL
+  INTO   :new.roomRateID
+  FROM   dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER customerRoom_bir
+BEFORE INSERT ON CustomerRoom
+FOR EACH ROW
+BEGIN
+  SELECT customerRoom_seq.NEXTVAL
+  INTO   :new.customerRoomID
+  FROM   dual;
+END;
+/

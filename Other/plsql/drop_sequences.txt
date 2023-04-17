@@ -1,0 +1,14 @@
+DROP SEQUENCE payment_seq;
+DROP SEQUENCE reservation_seq;
+DROP SEQUENCE room_seq;
+DROP SEQUENCE manager_seq;
+DROP SEQUENCE room_rate_seq;
+DROP SEQUENCE room_type_seq;
+DROP SEQUENCE amenity_seq;
+DROP SEQUENCE hotel_seq;
+DROP SEQUENCE customer_seq;
+DROP SEQUENCE credit_card_seq;
+DROP SEQUENCE membership_seq;
+DROP SEQUENCE address_seq;
+DROP SEQUENCE customerRoom_seq;
+commit;

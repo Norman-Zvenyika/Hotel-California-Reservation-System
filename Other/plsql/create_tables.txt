@@ -1,0 +1,123 @@
+CREATE TABLE Address (
+    addressID INT PRIMARY KEY,
+    street VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    zipCode VARCHAR(5) NOT NULL
+);
+
+CREATE TABLE Membership (
+    membershipID INT PRIMARY KEY,
+    points INT NOT NULL CHECK (points >= 0)
+);
+
+CREATE TABLE CreditCard (
+    cardID INT PRIMARY KEY,
+    cardToken VARCHAR(255) NOT NULL,
+    cardType VARCHAR(20) NOT NULL,
+    expirationDate DATE NOT NULL
+);
+
+CREATE TABLE Customer (
+    customerID INT PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL,
+    cardID INT NOT NULL,
+    addressID INT NOT NULL,
+    membershipID INT NOT NULL,
+    FOREIGN KEY (cardID) REFERENCES CreditCard(cardID) ON DELETE CASCADE,
+    FOREIGN KEY (addressID) REFERENCES Address(addressID) ON DELETE CASCADE,
+    FOREIGN KEY (membershipID) REFERENCES Membership(membershipID) ON DELETE CASCADE
+);
+
+CREATE TABLE Hotel (
+    hotelID INT PRIMARY KEY,
+    hotelName VARCHAR(255) NOT NULL,
+    addressID INT NOT NULL,
+    FOREIGN KEY (addressID) REFERENCES Address(addressID)
+);
+
+CREATE TABLE Amenity (
+    amenityID INT PRIMARY KEY,
+    description VARCHAR(255) NOT NULL,
+    hotelID INT NOT NULL,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID)
+);
+
+CREATE TABLE RoomType (
+    roomTypeID INT PRIMARY KEY,
+    description VARCHAR(1000) NOT NULL,
+    maxGuests INT NOT NULL
+);
+
+CREATE TABLE Reservation (
+    reservationID INT PRIMARY KEY,
+    customerID INT NOT NULL,
+    hotelID INT NOT NULL,
+    roomTypeID INT NOT NULL,
+    numberOfGuests INT NOT NULL,
+    arrivalDate DATE NOT NULL,
+    departureDate DATE NOT NULL,
+    reservationStatus VARCHAR(20) NOT NULL,
+    FOREIGN KEY (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID),
+    FOREIGN KEY (roomTypeID) REFERENCES RoomType(roomTypeID)
+);
+
+CREATE TABLE Payment (
+    paymentID INT PRIMARY KEY,
+    customerID INT NOT NULL,
+    reservationID INT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL CHECK (amount > 0),
+    pointsUsed INT NOT NULL CHECK (pointsUsed >= 0),
+    paymentDate DATE NOT NULL,
+    FOREIGN KEY (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE,
+    FOREIGN KEY (reservationID) REFERENCES Reservation(reservationID)
+);
+
+CREATE TABLE Room (
+    roomID INT PRIMARY KEY,
+    hotelID INT NOT NULL,
+    roomNumber INT NOT NULL,
+    roomTypeID INT NOT NULL,
+    roomStatus VARCHAR(20) NOT NULL,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID),
+    FOREIGN KEY (roomTypeID) REFERENCES RoomType(roomTypeID),
+    UNIQUE (hotelID, roomNumber)
+);
+
+CREATE TABLE Manager (
+    managerID INT PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL,
+    hotelID INT NOT NULL,
+    FOREIGN KEY (hotelID) REFERENCES Hotel(hotelID)
+);
+
+CREATE TABLE RoomRate (
+    roomRateID INT PRIMARY KEY,
+    roomTypeID INT NOT NULL,
+    managerID INT NOT NULL,
+    startDate DATE NOT NULL,
+    endDate DATE NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (roomTypeID) REFERENCES RoomType(roomTypeID),
+    FOREIGN KEY (managerID) REFERENCES Manager(managerID),
+    CHECK (startDate <= endDate),
+    UNIQUE (roomTypeID, startDate, endDate)
+);
+
+CREATE TABLE CustomerRoom (
+    customerRoomID INT PRIMARY KEY AUTO_INCREMENT,
+    reservationID INT NOT NULL,
+    roomID INT NOT NULL,
+    checkInDate DATE NOT NULL,
+    checkOutDate DATE,
+    FOREIGN KEY (reservationID) REFERENCES Reservation(reservationID),
+    FOREIGN KEY (roomID) REFERENCES Room(roomID)
+);
+
+
+

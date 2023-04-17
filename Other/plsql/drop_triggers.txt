@@ -1,0 +1,16 @@
+DROP TRIGGER payment_bir;
+DROP TRIGGER payment_before_insert;
+DROP TRIGGER payment_points_update;
+DROP TRIGGER reservation_bir;
+DROP TRIGGER reservation_guests_check;
+DROP TRIGGER room_bir;
+DROP TRIGGER manager_bir;
+DROP TRIGGER room_rate_bir;
+DROP TRIGGER room_type_bir;
+DROP TRIGGER amenity_bir;
+DROP TRIGGER hotel_bir;
+DROP TRIGGER customer_bir;
+DROP TRIGGER membership_bir;
+DROP TRIGGER credit_card_bir;
+DROP TRIGGER address_bir;
+DROP TRIGGER customerRoom_bir;
