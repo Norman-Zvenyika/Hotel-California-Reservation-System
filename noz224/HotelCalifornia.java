@@ -74,7 +74,7 @@ public class HotelCalifornia {
             //catch the password error
             catch (SQLException ex) {
                 if (ex.getErrorCode() == 1017) {
-                    System.out.println("Incorrect password. Please try again.");
+                    System.out.println("Incorrect username/ password. Please try again.");
                 } else {
                     System.out.println(ex.getMessage());
                     break;
@@ -102,11 +102,11 @@ public class HotelCalifornia {
         String [] userCredentials = new String [2];
 
         //request for username
-        System.out.print("Enter Oracle username: ");
+        System.out.print("\nEnter your Oracle username: ");
         userCredentials[0] = myScanner.nextLine();
      
         //request password
-        System.out.print("Enter Oracle user password: ");
+        System.out.print("Enter your Oracle user password: ");
         userCredentials[1] = myScanner.nextLine();
 
         //return user credentials

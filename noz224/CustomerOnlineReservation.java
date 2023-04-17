@@ -35,10 +35,10 @@ public class CustomerOnlineReservation {
         // Enforce that the departure date is greater than or equal to the arrival date
         while (LocalDate.parse(departureDate).isBefore(LocalDate.parse(arrivalDate))) {
             System.out.println(
-                    "The departure date must be greater than or equal to the arrival date. Please enter a new departure date (YYYY-MM-DD):");
-            System.out.println("Enter the arrival date of your reservation (YYYY-MM-DD)");
+                    "The departure date must be greater than or equal to the arrival date.");
+            System.out.print("Enter the arrival date of your reservation (YYYY-MM-DD): ");
             arrivalDate = getDate(myScanner);
-            System.out.println("Enter the departure date of your reservation (YYYY-MM-DD)");
+            System.out.print("Enter the departure date of your reservation (YYYY-MM-DD): ");
             departureDate = getDate(myScanner);
         }
 
@@ -119,6 +119,15 @@ public class CustomerOnlineReservation {
                     int newCustomerID = createNewCustomer(con, myScanner);
 
                     System.out.println("\nYou a now a customer of Hotel California!\n");
+
+                    System.out.println("Here are your customer details: ");
+                    Customer customerInfo = getCustomerInformation(con,newCustomerID);
+                    System.out.println("First Name: "+ customerInfo.getFirstName());
+                    System.out.println("Last Name: "+ customerInfo.getLastName());
+                    System.out.println("CustomerID: "+ customerInfo.getCustomerID());
+                    System.out.println("MembershipID: "+ customerInfo.getMembershipID());
+                    System.out.println("Phone number: "+ customerInfo.getPhoneNumber());
+                    System.out.println("");
 
                     //complete the reservation
                     reservationComplete  = makeReservation(con,newCustomerID,arrivalDate,departureDate,roomTypeID, myScanner, numberOfGuests, userHotelID); 
@@ -729,7 +738,7 @@ public class CustomerOnlineReservation {
 
         // query to get the cities with free rooms during a particular period
         String citiesQuery = "WITH reserved_roomtypes AS (" +
-        "    SELECT rr.roomTypeID" +
+        "    SELECT rr.hotelID, rr.roomTypeID" +
         "    FROM Reservation rr" +
         "    WHERE (rr.arrivalDate <= ? AND rr.departureDate >= ?)" +
         ")," +
@@ -737,7 +746,10 @@ public class CustomerOnlineReservation {
         "    SELECT r.roomID, r.roomTypeID, r.hotelID" +
         "    FROM Room r" +
         "    JOIN RoomType rt ON r.roomTypeID = rt.roomTypeID" +
-        "    WHERE r.roomStatus = 'Available' AND r.roomTypeID NOT IN (SELECT * FROM reserved_roomtypes)" +
+        "    WHERE r.roomStatus = 'Available' AND NOT EXISTS (" +
+        "        SELECT * FROM reserved_roomtypes rrt" +
+        "        WHERE rrt.hotelID = r.hotelID AND rrt.roomTypeID = r.roomTypeID" +
+        "    )" +
         ")" +
         "SELECT h.hotelID, h.hotelName, a.city " + 
         "FROM available_rooms ar " + 
@@ -890,14 +902,14 @@ public class CustomerOnlineReservation {
             if (!roomTypeMaxGuests.containsKey(selectedRoomTypeID)) {
                 System.out.print("\nInvalid Room Type ID. Please enter a valid Room Type ID from the list above: ");
             } else if (numberOfGuests > roomTypeMaxGuests.get(selectedRoomTypeID)) {
-                System.out.println("The number of guests exceeds the maximum allowed for the selected room type. Please enter a different Room Type ID:");
-                System.out.print("Do you want to change your number of guests? ");
+                System.out.println("\nThe number of guests exceeds the maximum allowed for the selected room type.\n");
+                System.out.print("Do you want to change your number of guests? (Y/N) ");
                 String userResponse = getYesOrNoInput(myScanner);
                 if(userResponse.equals("Y")) {
                     return -4;
                 }
                 else {
-                    break;
+                    return -1;
                 }
             } else {
                 break;
