@@ -1,21 +1,32 @@
-DROP INDEX idx_hotel_id;
-DROP INDEX idx_room_id;
+-- Room
 DROP INDEX idx_room_hotelid_roomtypeid;
+
+-- CustomerRoom
 DROP INDEX idx_customerroom_roomid;
 DROP INDEX idx_customerroom_checkindate_checkoutdate;
+DROP INDEX idx_customerroom_reservationid;
+
+-- Payment
 DROP INDEX idx_payment_reservationid;
 DROP INDEX idx_payment_paymentdate;
-DROP INDEX idx_manager_id;
+
+-- Manager
 DROP INDEX idx_manager_hotelid;
-DROP INDEX idx_roomtype_id;
+
+-- RoomRate
 DROP INDEX idx_roomrate_roomtypeid;
-DROP INDEX idx_customerroom_reservationid;
+DROP INDEX idx_roomrate_managerid;
+
+-- Reservation
 DROP INDEX idx_reservation_customerid;
 DROP INDEX idx_reservation_hotelid;
 DROP INDEX idx_reservation_roomtypeid;
-DROP INDEX idx_roomrate_managerid;
+DROP INDEX idx_reservation_customerid_hotelid_roomtypeid;
+
+-- Customer
 DROP INDEX idx_customer_cardid;
 DROP INDEX idx_customer_addressid;
 DROP INDEX idx_customer_membershipid;
-DROP INDEX idx_reservation_customerid_hotelid_roomtypeid;
+
+-- Amenity
 DROP INDEX idx_amenity_hotelid;
