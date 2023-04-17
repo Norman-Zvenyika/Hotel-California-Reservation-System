@@ -53,8 +53,7 @@ public class CustomerOnlineReservation {
 
             // Check if the hotelID is valid
             if (userHotelID == -4) {
-                System.out.println("There are no available hotel rooms during the specified period.");
-                System.out.println("Do you want to try again with different dates? (Y/N)");
+                System.out.print("Do you want to try again with different dates? (Y/N): ");
                 String userResponse = getYesOrNoInput(myScanner);
 
                 if ("Y".equalsIgnoreCase(userResponse)) {
