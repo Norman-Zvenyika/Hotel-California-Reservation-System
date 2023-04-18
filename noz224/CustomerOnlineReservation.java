@@ -15,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.Date;
 import java.time.temporal.ChronoUnit;
 import java.util.regex.Pattern;
-import java.text.SimpleDateFormat;
 
 public class CustomerOnlineReservation {
 
