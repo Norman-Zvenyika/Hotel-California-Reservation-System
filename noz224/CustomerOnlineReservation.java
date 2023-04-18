@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Date;
 import java.time.temporal.ChronoUnit;
 import java.util.regex.Pattern;
+import java.text.SimpleDateFormat;
 
 public class CustomerOnlineReservation {
 
@@ -146,6 +147,186 @@ public class CustomerOnlineReservation {
         else {
             System.out.println("\nReservation cancelled. Try again.\n");
         }
+    }
+
+    //function for converting sql date to string
+    public static String formatDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(date);
+    }
+
+    //function to change roomtype for a cuustomer
+    public static Reservation changeRoomType(Connection con, Scanner myScanner, Reservation reservationDetails) {
+        int numberOfGuests = 0;
+        int roomTypeID  = -1;
+        boolean reservationUpdate = false;
+
+        //requests the information again
+        while(true) {
+            
+            //request for the number of guests that the user has. Repate until the user enters a valid integer
+            numberOfGuests = getNumberOfGuests(myScanner);
+
+            //request roomTypeID based on the available hotel
+            roomTypeID = getRoomTypeID(con, myScanner, reservationDetails.getHotelID(), formatDate(reservationDetails.getArrivalDate()), formatDate(reservationDetails.getDepartureDate()), numberOfGuests);
+
+            //check if the user wants to change the number of guests
+            if(roomTypeID!=-4) {
+                break;
+            }
+        }
+
+        //check if the roomTypeID is valid
+        if(roomTypeID>=0) {
+            
+            //get customerID
+            int customerID = reservationDetails.getCustomerID();
+
+            //complete the reservation
+            reservationUpdate  = updateReservation(con,customerID,formatDate(reservationDetails.getArrivalDate()),formatDate(reservationDetails.getDepartureDate()),roomTypeID, 
+            myScanner, numberOfGuests, reservationDetails.getHotelID(), reservationDetails.getReservationID()); 
+        }
+
+        //return status if reservation gets updated
+        if(reservationUpdate) {
+            reservationDetails = FrontDeskAgent.getReservation(con, reservationDetails.getCustomerID());
+            System.out.println("\nThe room type has been updated successfully.");
+        }
+        else {
+            System.out.println("\nThe room type was not updated.");
+        }
+        return reservationDetails;
+    }
+
+    //function to update reservation
+    public static boolean updateReservation(Connection con,int customerID, String arrivalDate,String departureDate,
+                                            int roomTypeID, Scanner myScanner, int numOfGuests, int hotelID, int reservationID) {
+
+        // Get the previous payment amount by retrieving by using the reservationID
+        double prevPaymentAmount;
+        try (PreparedStatement ps = con.prepareStatement("SELECT amount FROM payment WHERE reservationID = ?")) {
+            ps.setInt(1, reservationID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                prevPaymentAmount = rs.getDouble("amount");
+            } else {
+                throw new SQLException("Payment not found for the given reservationID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+                                                
+        //retrieve card information
+        Card customerCardInfor = getcustomerCardInfo(con, customerID);
+
+        //check if the card has not expired
+        boolean validCard = false;
+        while(validCard==false) {
+            validCard = checkExpirationDateOfCard(customerCardInfor.getExpirationDate());
+            
+            if(validCard==false) {
+                System.out.println("\nYour card is not valid. It expired on "+ customerCardInfor.getExpirationDate());
+                System.out.println("\nUse a valid card : ");
+                //customerCardInfor = createNewCard(myScanner);
+            }
+        }
+
+        //calculate the cost of the customer stay based on the roomType and number of days
+        double bookingPrice = getBookingPrice(con, roomTypeID, arrivalDate, departureDate);
+        double additionalPayment = 0;
+
+        //get the number of points belonging to the user
+        int numOfPoints = getNumberOfPoints(con, customerID);
+
+        //let the user know their number of points available
+        System.out.printf("You have %d membership points\n", numOfPoints);
+        int numOfPointsUsed = 0;
+        
+        //only ask if the user wants to use some points that is if they have some already
+        if(numOfPoints > 0) {
+
+            //get the number of points the user wants to use
+            numOfPointsUsed = getNumberOfPointsUsed(myScanner,numOfPoints);
+
+            if (numOfPointsUsed > 0) {
+                
+                //fixed equivalent amount for each pooint
+                double pointsCost = 0.005;
+
+                //calculate the discount
+                double discount = calculateDiscount(numOfPointsUsed, pointsCost);
+                System.out.printf("\nThe discount is $%.2f%n\n", discount);
+
+                //deduct discount to reflect the new amount
+                bookingPrice = bookingPrice - discount;
+
+            }
+        }
+
+        //update the number of points
+
+        //calculate any possible refund or additional amount
+        additionalPayment = bookingPrice - prevPaymentAmount;
+
+        if(additionalPayment < 0) {
+            System.out.printf("Your refund is $%.2f%n\n", additionalPayment);
+        }
+        else {
+            //display the additinal fee
+            System.out.printf("The additional bill is $%.2f%n\n", additionalPayment);
+        }
+
+        //format payment date
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String paymentDate = currentDate.format(formatter);
+        java.sql.Date sqlPaymentDate = convertStringToSqlDate(paymentDate);
+
+        //set reservation status to complete
+        String reservationStatus = "Confirmed";
+
+        //format date
+        java.sql.Date sqlArrivalDate = convertStringToSqlDate(arrivalDate);
+        java.sql.Date sqlDepartureDate = convertStringToSqlDate(departureDate);
+
+        // update reservation using stored procedure and get reservation ID
+        int updatedReservationID = -1;
+        try (CallableStatement csReservation = con.prepareCall("{call update_old_reservation(?,?,?,?,?,?,?,?,?)}")) {
+            csReservation.setInt(1, reservationID);
+            csReservation.setInt(2, customerID);
+            csReservation.setInt(3, hotelID);
+            csReservation.setInt(4, roomTypeID);
+            csReservation.setInt(5, numOfGuests);
+            csReservation.setDate(6, sqlArrivalDate);
+            csReservation.setDate(7, sqlDepartureDate);
+            csReservation.setString(8, reservationStatus);
+            csReservation.registerOutParameter(9, Types.INTEGER); // Add an extra OUT parameter for the updated reservation ID
+            csReservation.execute();
+            updatedReservationID = csReservation.getInt(9);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // Update payment using stored procedure and get payment ID
+        int paymentID;
+        try (CallableStatement csPayment = con.prepareCall("{call update_old_payment(?,?,?,?,?,?)}")) {
+            csPayment.setInt(1, customerID);
+            csPayment.setInt(2, updatedReservationID); // Use the updatedReservationID obtained from the previous stored procedure call
+            csPayment.setDouble(3, bookingPrice);
+            csPayment.setInt(4, numOfPointsUsed);
+            csPayment.setDate(5, sqlPaymentDate);
+            csPayment.registerOutParameter(6, Types.INTEGER);
+            csPayment.execute();
+            paymentID = csPayment.getInt(6);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // If paymentID > 0, return true, else return false.
+        return paymentID > 0;
     }
 
     //format the date for SQL
@@ -403,7 +584,7 @@ public class CustomerOnlineReservation {
             newCustomer.setLastName(myScanner.nextLine());
 
             // Get the customer phone number, loop until the user provides the correct information
-            System.out.print("Enter phone number (US format, e.g. +1(123)-456-7890): ");
+            System.out.print("Enter phone number - US format, e.g. +1(123)-456-7890: ");
             String phoneNumber = myScanner.nextLine();
             Pattern phonePattern = Pattern.compile("^\\+1\\(\\d{3}\\)-\\d{3}-\\d{4}$");
 
@@ -474,7 +655,7 @@ public class CustomerOnlineReservation {
                     if (pointsToUse >= 1 && pointsToUse <= availablePoints) {
                         break;
                     } else {
-                        System.out.printf("\nInvalid input. Please enter a number between 1 and %d.%n inclusive", availablePoints);
+                        System.out.printf("\nInvalid input. Please enter a number (1-%d): ", availablePoints);
                     }
                 } catch (NumberFormatException e) {
                     // If the input is not a valid number, inform the user
@@ -923,8 +1104,15 @@ public class CustomerOnlineReservation {
             return -1;
         }
 
+        
         int selectedRoomTypeID = -1;
 
+        //check if we have any rooms available
+        if (availableRoomTypeMaxGuests.isEmpty() ||  roomTypeMaxGuests.isEmpty()) {
+            System.out.println("\nThere are no available room types during the specified period.");
+            return selectedRoomTypeID;
+        }
+        
         if(freeRoomType==false) {
             System.out.println("\nThe number of guests exceeds the maximum allowed for the available room types.\n");
             System.out.println("Below is a list of all available roomtypes, but you need to change the number of guests to select any of them.");

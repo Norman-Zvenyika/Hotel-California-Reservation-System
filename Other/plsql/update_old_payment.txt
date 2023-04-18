@@ -1,0 +1,26 @@
+CREATE OR REPLACE PROCEDURE update_old_payment(
+    p_customer_id IN Payment.customerID%TYPE,
+    p_reservation_id IN Payment.reservationID%TYPE,
+    p_booking_price IN Payment.amount%TYPE,
+    p_num_of_points_used IN Payment.pointsUsed%TYPE,
+    p_payment_date IN Payment.paymentDate%TYPE,
+    p_payment_id OUT Payment.paymentID%TYPE
+) AS
+BEGIN
+    UPDATE Payment
+    SET customerID = p_customer_id, -- Corrected the column name here
+        reservationID = p_reservation_id,
+        amount = p_booking_price,
+        pointsUsed = p_num_of_points_used,
+        paymentDate = p_payment_date
+    WHERE reservationID = p_reservation_id;
+
+    SELECT paymentID INTO p_payment_id FROM Payment WHERE reservationID = p_reservation_id;
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END update_old_payment;
+/

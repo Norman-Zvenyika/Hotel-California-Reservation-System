@@ -117,10 +117,19 @@ CREATE OR REPLACE TRIGGER payment_points_update
 AFTER INSERT ON Payment
 FOR EACH ROW
 WHEN (NEW.pointsUsed > 0)
+DECLARE
+    v_membership_id Membership.membershipID%TYPE;
 BEGIN
+    -- Get the membershipID based on the customerID from the Customer table
+    SELECT membershipID
+    INTO v_membership_id
+    FROM Customer
+    WHERE customerID = :NEW.customerID;
+
+    -- Update the points in the Membership table using the retrieved membershipID
     UPDATE Membership
     SET points = points - :NEW.pointsUsed
-    WHERE membershipID = :NEW.customerID;
+    WHERE membershipID = v_membership_id;
 END;
 /
 

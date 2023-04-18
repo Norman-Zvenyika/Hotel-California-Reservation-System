@@ -29,7 +29,14 @@ public class FrontDeskAgent {
                 //perform the actions according to check out or check in
                 switch(userOption) {
                     case 1:
-                        if(checkIn(con, reservationDetails, "Occupied")) {
+                        //prompt the user to see if they want to change the roomtype
+                        System.out.print("\nDo you want to change your room type?: ");
+                        String changeRoomType = CustomerOnlineReservation.getYesOrNoInput(myScanner);
+                        if(changeRoomType.equals("Y")) {
+                            reservationDetails = CustomerOnlineReservation.changeRoomType(con, myScanner, reservationDetails);
+                        }
+    
+                        if(checkIn(con, reservationDetails, "Occupied", myScanner)) {
                             System.out.println("\nThe customer has successfully checked into the room.");
                         }
                         else {
@@ -55,7 +62,6 @@ public class FrontDeskAgent {
         int hotelId;
         int roomId;
         int updateRoomStatusResult;
-
         // Retrieve the hotelID from the Reservation table using the reservationID
         try (PreparedStatement stmt1 = con.prepareStatement("SELECT hotelID FROM Reservation WHERE reservationID = ?")) {
             stmt1.setInt(1, reservationId);
@@ -72,7 +78,7 @@ public class FrontDeskAgent {
         }
 
         // Retrieve the roomID from the CustomerRoom table using the reservationID
-        try (PreparedStatement stmt2 = con.prepareStatement("SELECT roomID FROM CustomerRoom WHERE reservationID = ?")) {
+        try (PreparedStatement stmt2 = con.prepareStatement("SELECT roomID FROM CustomerRoom WHERE reservationID = ? AND checkOutDate IS NULL")) {
             stmt2.setInt(1, reservationId);
             try (ResultSet rs2 = stmt2.executeQuery()) {
                 if (rs2.next()) {
@@ -105,7 +111,6 @@ public class FrontDeskAgent {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String checkOutDate = currentDate.format(formatter);
         java.sql.Date sqlcheckOutDate = CustomerOnlineReservation.convertStringToSqlDate(checkOutDate);
-
         if (updateRoomStatusResult == 1) {
             try (PreparedStatement stmt4 = con.prepareStatement("UPDATE CustomerRoom SET checkOutDate = ? WHERE reservationID = ?")) {
                 stmt4.setDate(1, sqlcheckOutDate );
@@ -124,16 +129,16 @@ public class FrontDeskAgent {
                 return false;
             }
         }
-
         return false;
     }
 
     //function to perform check in
-    public static boolean checkIn(Connection con, Reservation reservation, String roomStatus) {
+    public static boolean checkIn(Connection con, Reservation reservation, String roomStatus, Scanner myScanner) {
         try {
             // Get the hotel ID and roomTypeID from the reservation object
             int hotelID = reservation.getHotelID();
             int roomTypeID = reservation.getRoomTypeID();
+            System.out.println("Room type is :" + roomTypeID);
             int roomID;
     
             // Identify the hotel from the hotel table
@@ -171,7 +176,8 @@ public class FrontDeskAgent {
                     }
                 }
             }
-    
+            System.out.println("Pass 10");
+
             // Create a CallableStatement to call the stored procedure
             String storedProcedureCall = "{call UPDATE_ROOM_STATUS(?, ?, ?, ?, ?)}";
             try (CallableStatement cstmt = con.prepareCall(storedProcedureCall)) {

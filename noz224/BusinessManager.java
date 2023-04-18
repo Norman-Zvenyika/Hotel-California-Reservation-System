@@ -122,9 +122,8 @@ public class BusinessManager {
         // SQL query to retrieve the total revenues for each hotel over the given time period
         String sql = "SELECT h.hotelID, h.hotelName, SUM(p.amount) AS total_revenue " +
                     "FROM Hotel h " +
-                    "JOIN Room r ON h.hotelID = r.hotelID " +
-                    "JOIN CustomerRoom cr ON r.roomID = cr.roomID " +
-                    "JOIN Payment p ON cr.reservationID = p.reservationID " +
+                    "JOIN Reservation r ON h.hotelID = r.hotelID " +
+                    "JOIN Payment p ON r.reservationID = p.reservationID " +
                     "WHERE p.paymentDate >= ? AND p.paymentDate <= ? " +
                     "GROUP BY h.hotelID, h.hotelName " +
                     "ORDER BY h.hotelID";

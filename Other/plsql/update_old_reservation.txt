@@ -1,0 +1,31 @@
+CREATE OR REPLACE PROCEDURE update_old_reservation(
+    p_reservation_id IN Reservation.reservationID%TYPE,
+    p_customer_id IN Reservation.customerID%TYPE,
+    p_hotel_id IN Reservation.hotelID%TYPE,
+    p_room_type_id IN Reservation.roomTypeID%TYPE,
+    p_num_of_guests IN Reservation.numberOfGuests%TYPE,
+    p_arrival_date IN Reservation.arrivalDate%TYPE,
+    p_departure_date IN Reservation.departureDate%TYPE,
+    p_reservation_status IN Reservation.reservationStatus%TYPE,
+    p_updated_reservation_id OUT Reservation.reservationID%TYPE
+) AS
+BEGIN
+    UPDATE Reservation
+    SET customerID = p_customer_id,
+        hotelID = p_hotel_id,       
+        roomTypeID = p_room_type_id,
+        numberOfGuests = p_num_of_guests,
+        arrivalDate = p_arrival_date,
+        departureDate = p_departure_date,
+        reservationStatus = p_reservation_status
+    WHERE reservationID = p_reservation_id;
+
+    SELECT reservationID INTO p_updated_reservation_id FROM Reservation WHERE reservationID = p_reservation_id;
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END update_old_reservation;
+/
