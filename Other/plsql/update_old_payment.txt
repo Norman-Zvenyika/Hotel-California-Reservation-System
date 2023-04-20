@@ -8,7 +8,7 @@ CREATE OR REPLACE PROCEDURE update_old_payment(
 ) AS
 BEGIN
     UPDATE Payment
-    SET customerID = p_customer_id, -- Corrected the column name here
+    SET customerID = p_customer_id,
         reservationID = p_reservation_id,
         amount = p_booking_price,
         pointsUsed = p_num_of_points_used,

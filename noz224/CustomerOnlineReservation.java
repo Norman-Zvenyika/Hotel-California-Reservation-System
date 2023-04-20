@@ -148,13 +148,26 @@ public class CustomerOnlineReservation {
         }
     }
 
-    //function for converting sql date to string
+    /**
+    * This function is used to convert an SQL Date object into a String in the format "yyyy-MM-dd".
+    *
+    * @param date The SQL Date object to be formatted.
+    * @return A formatted date string in the format "yyyy-MM-dd".
+    */
     public static String formatDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(date);
     }
 
-    //function to change roomtype for a cuustomer
+    /**
+    * This function is used to change the room type for a customer's reservation.
+    * It requests the necessary information from the user and updates the reservation if a valid room type ID is provided.
+    *
+    * @param con                The Connection object to the database.
+    * @param myScanner          The Scanner object used to receive user input.
+    * @param reservationDetails The Reservation object containing the current reservation details.
+    * @return An updated Reservation object if the room type is successfully updated; otherwise, the original Reservation object.
+    */
     public static Reservation changeRoomType(Connection con, Scanner myScanner, Reservation reservationDetails) {
         int numberOfGuests = 0;
         int roomTypeID  = -1;
@@ -197,7 +210,21 @@ public class CustomerOnlineReservation {
         return reservationDetails;
     }
 
-    //function to update reservation
+    /**
+    * This function is used to update an existing reservation with new information.
+    * It takes necessary parameters, retrieves the previous payment amount, updates the reservation and payment records.
+    *
+    * @param con              The Connection object to the database.
+    * @param customerID       The ID of the customer making the reservation.
+    * @param arrivalDate      The arrival date in the format "yyyy-MM-dd".
+    * @param departureDate    The departure date in the format "yyyy-MM-dd".
+    * @param roomTypeID       The ID of the room type being booked.
+    * @param myScanner        The Scanner object used to receive user input.
+    * @param numOfGuests      The number of guests for the reservation.
+    * @param hotelID          The ID of the hotel where the reservation is made.
+    * @param reservationID    The ID of the existing reservation to be updated.
+    * @return true if the reservation is successfully updated; otherwise, false.
+    */
     public static boolean updateReservation(Connection con,int customerID, String arrivalDate,String departureDate,
                                             int roomTypeID, Scanner myScanner, int numOfGuests, int hotelID, int reservationID) {
 
@@ -208,10 +235,12 @@ public class CustomerOnlineReservation {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 prevPaymentAmount = rs.getDouble("amount");
-            } else {
+            } 
+            else {
                 throw new SQLException("Payment not found for the given reservationID");
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -263,11 +292,10 @@ public class CustomerOnlineReservation {
             }
         }
 
-        //update the number of points
-
         //calculate any possible refund or additional amount
         additionalPayment = bookingPrice - prevPaymentAmount;
 
+        //print the refund or additional amount needed
         if(additionalPayment < 0) {
             System.out.printf("Your refund is $%.2f%n\n", additionalPayment);
         }
@@ -275,6 +303,9 @@ public class CustomerOnlineReservation {
             //display the additinal fee
             System.out.printf("The additional bill is $%.2f%n\n", additionalPayment);
         }
+
+        //update the bookingpirce (it will either increase or decrease based on additional amount)
+        bookingPrice = bookingPrice + additionalPayment;
 
         //format payment date
         LocalDate currentDate = LocalDate.now();
@@ -303,7 +334,8 @@ public class CustomerOnlineReservation {
             csReservation.registerOutParameter(9, Types.INTEGER); // Add an extra OUT parameter for the updated reservation ID
             csReservation.execute();
             updatedReservationID = csReservation.getInt(9);
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -319,7 +351,8 @@ public class CustomerOnlineReservation {
             csPayment.registerOutParameter(6, Types.INTEGER);
             csPayment.execute();
             paymentID = csPayment.getInt(6);
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -328,36 +361,44 @@ public class CustomerOnlineReservation {
         return paymentID > 0;
     }
 
-    //format the date for SQL
+    /**
+    * This function is used to convert a date string in the format "yyyy-MM-dd" to a java.sql.Date object.
+    * It is useful for inserting or updating date values in SQL databases.
+    *
+    * @param dateString The date string to be converted, in the format "yyyy-MM-dd".
+    * @return A java.sql.Date object representing the converted date, or null if the conversion fails.
+    */
     public static java.sql.Date convertStringToSqlDate(String dateString) {
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             java.util.Date parsedDate = format.parse(dateString);
             return new java.sql.Date(parsedDate.getTime());
-        } catch (ParseException e) {
+        } 
+        catch (ParseException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    // make a reservation for a specific customer
+    /**
+    * This function is used to create a new reservation for a specific customer, taking into account
+    * their membership points and card validity.
+    *
+    * @param con            The Connection object to access the database.
+    * @param customerID     The ID of the customer making the reservation.
+    * @param arrivalDate    The arrival date of the reservation in the format "yyyy-MM-dd".
+    * @param departureDate  The departure date of the reservation in the format "yyyy-MM-dd".
+    * @param roomTypeID     The ID of the room type for the reservation.
+    * @param myScanner      The Scanner object for user input.
+    * @param numOfGuests    The number of guests for the reservation.
+    * @param hotelID        The ID of the hotel where the reservation is being made.
+    * @return               A boolean value indicating whether the reservation was successful (true) or not (false).
+    */
     public static boolean makeReservation(Connection con,int customerID, String arrivalDate,String departureDate,
                                             int roomTypeID, Scanner myScanner, int numOfGuests, int hotelID) {
                     
         //retrieve card information
         Card customerCardInfor = getcustomerCardInfo(con, customerID);
-
-        //check if the card has not expired
-        boolean validCard = false;
-        while(validCard==false) {
-            validCard = checkExpirationDateOfCard(customerCardInfor.getExpirationDate());
-            
-            if(validCard==false) {
-                System.out.println("\nYour card is not valid. It expired on "+ customerCardInfor.getExpirationDate());
-                System.out.println("\nUse a valid card : ");
-                //customerCardInfor = createNewCard(myScanner);
-            }
-        }
 
         //calculate the cost of the customer stay based on the roomType and number of days
         double bookingPrice = getBookingPrice(con, roomTypeID, arrivalDate, departureDate);
@@ -419,7 +460,8 @@ public class CustomerOnlineReservation {
             csReservation.registerOutParameter(8, Types.INTEGER);
             csReservation.execute();
             reservationID = csReservation.getInt(8);
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -435,7 +477,8 @@ public class CustomerOnlineReservation {
             csPayment.registerOutParameter(6, Types.INTEGER);
             csPayment.execute();
             paymentID = csPayment.getInt(6);
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -444,7 +487,12 @@ public class CustomerOnlineReservation {
         return paymentID > 0;
     }
 
-    // Create a new membership and insert it into the database, then return the generated membership ID
+    /**
+    * Creates a new membership and inserts it into the database, then returns the generated membership ID.
+    *
+    * @param con The Connection object to access the database.
+    * @return The generated membership ID, or -1 if an error occurs.
+    */
     public static int createNewMembership(Connection con) {
         int membershipID = -1;
 
@@ -468,7 +516,13 @@ public class CustomerOnlineReservation {
         return membershipID;
     }
 
-   // Create a new address and add it to the database.
+    /**
+    * Creates a new address and adds it to the database.
+    *
+    * @param con The Connection object to access the database.
+    * @param myScanner The Scanner object to read user inputs.
+    * @return The generated address ID, or -1 if an error occurs.
+    */
     public static int createNewAddress(Connection con, Scanner myScanner) {
         int addressID = -1;
         // Request the address information from the user
@@ -506,14 +560,21 @@ public class CustomerOnlineReservation {
             // Retrieve the generated addressID
             addressID = cstmt.getInt(5);
 
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
         }
 
         return addressID;
     }
 
-    //create and inserta nwe card into the database. Remember cardID autoincrements
+    /**
+    * Creates a new card and inserts it into the database.
+    *
+    * @param con The Connection object to access the database.
+    * @param myScanner The Scanner object to read user inputs.
+    * @return The generated card ID, or -1 if an error occurs.
+    */
     public static int createNewCard(Connection con, Scanner myScanner) {
         int cardID = -1;
     
@@ -543,14 +604,21 @@ public class CustomerOnlineReservation {
             // Retrieve the generated cardID
             cardID = cstmt.getInt(4);
     
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
         }
     
         return cardID;
     }
     
-    // create a new customer and return the customerID of the new customer
+    /**
+    * Creates a new customer and inserts it into the database.
+    *
+    * @param con The Connection object to access the database.
+    * @param myScanner The Scanner object to read user inputs.
+    * @return The generated customer ID, or -1 if an error occurs.
+    */
     public static int createNewCustomer(Connection con, Scanner myScanner) {
         //arbitraruy customerID
         int customerID = -1;
@@ -624,7 +692,13 @@ public class CustomerOnlineReservation {
         return customerID;
     }
 
-    //function to calcluate the discount
+    /**
+    * Calculates the discount based on the number of points used and the fixed cost per point.
+    *
+    * @param numOfPointsUsed The number of points the customer wants to use for the discount.
+    * @param pointsCost The fixed cost per point.
+    * @return The calculated discount, rounded to two decimal places.
+    */
     public static double calculateDiscount(int numOfPointsUsed, double pointsCost) {
         // Calculate the discount based on the number of points used and the fixed cost per point
         double discount = numOfPointsUsed * pointsCost;
@@ -653,10 +727,12 @@ public class CustomerOnlineReservation {
                     // Check if the entered number is between 1 and the available points
                     if (pointsToUse >= 1 && pointsToUse <= availablePoints) {
                         break;
-                    } else {
+                    } 
+                    else {
                         System.out.printf("\nInvalid input. Please enter a number (1-%d): ", availablePoints);
                     }
-                } catch (NumberFormatException e) {
+                } 
+                catch (NumberFormatException e) {
                     // If the input is not a valid number, inform the user
                     System.out.println("\nInvalid input. Please enter a valid number.");
                 }
@@ -668,36 +744,43 @@ public class CustomerOnlineReservation {
     }
 
 
-    //function to get the number of points belonging to the user
+    /**
+    * Retrieves the number of points belonging to the customer based on their customerID.
+    *
+    * @param con The database connection.
+    * @param customerID The customer's ID.
+    * @return The number of points associated with the customer's membership.
+    */
     public static int getNumberOfPoints(Connection con, int customerID) {
         int numOfPoints = 0;
 
         // Query to retrieve the membershipID of the customer based on their customerID
         String query = "SELECT membershipID FROM Customer WHERE customerID = ?";
 
-        try {
-            PreparedStatement pstmt = con.prepareStatement(query);
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
             pstmt.setInt(1, customerID);
 
-            ResultSet rs = pstmt.executeQuery();
+            try (ResultSet rs = pstmt.executeQuery()) {
+                // If a result is found, set the membershipID to the value in the database
+                if (rs.next()) {
+                    int membershipID = rs.getInt("membershipID");
 
-            // If a result is found, set the membershipID to the value in the database
-            if (rs.next()) {
-                int membershipID = rs.getInt("membershipID");
+                    // Query to retrieve the number of points of the customer based on their membershipID
+                    String pointsQuery = "SELECT points FROM Membership WHERE membershipID = ?";
+                    try (PreparedStatement pointsPstmt = con.prepareStatement(pointsQuery)) {
+                        pointsPstmt.setInt(1, membershipID);
 
-                // Query to retrieve the number of points of the customer based on their membershipID
-                String pointsQuery = "SELECT points FROM Membership WHERE membershipID = ?";
-                pstmt = con.prepareStatement(pointsQuery);
-                pstmt.setInt(1, membershipID);
-
-                ResultSet pointsRs = pstmt.executeQuery();
-
-                // If a result is found, set the numOfPoints to the value in the database
-                if (pointsRs.next()) {
-                    numOfPoints = pointsRs.getInt("points");
+                        try (ResultSet pointsRs = pointsPstmt.executeQuery()) {
+                            // If a result is found, set the numOfPoints to the value in the database
+                            if (pointsRs.next()) {
+                                numOfPoints = pointsRs.getInt("points");
+                            }
+                        }
+                    }
                 }
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -705,7 +788,15 @@ public class CustomerOnlineReservation {
         return numOfPoints;
     }
 
-    //function to calculate booking price
+    /**
+    * Calculates the booking price for a specified room type and date range.
+    *
+    * @param con The database connection.
+    * @param roomTypeID The ID of the room type.
+    * @param arrivalDate The arrival date as a String (YYYY-MM-DD).
+    * @param departureDate The departure date as a String (YYYY-MM-DD).
+    * @return The total booking price for the specified room type and date range.
+    */
     public static double getBookingPrice(Connection con, int roomTypeID, String arrivalDate, String departureDate) {
         double price = 0;
         double defaultRate = 40;
@@ -717,46 +808,48 @@ public class CustomerOnlineReservation {
         // Extract the room rates from the database based on the roomTypeID and the date range
         String query = "SELECT startDate, endDate, price FROM RoomRate WHERE roomTypeID = ? AND ((startDate BETWEEN ? AND ?) OR (endDate BETWEEN ? AND ?)) ORDER BY startDate ASC";
 
-        try {
-            PreparedStatement pstmt = con.prepareStatement(query);
+        try (PreparedStatement pstmt = con.prepareStatement(query)) {
             pstmt.setInt(1, roomTypeID);
             pstmt.setDate(2, java.sql.Date.valueOf(arrivalLocalDate));
             pstmt.setDate(3, java.sql.Date.valueOf(departureLocalDate));
             pstmt.setDate(4, java.sql.Date.valueOf(arrivalLocalDate));
             pstmt.setDate(5, java.sql.Date.valueOf(departureLocalDate));
 
-            ResultSet rs = pstmt.executeQuery();
+            try (ResultSet rs = pstmt.executeQuery()) {
 
-            LocalDate currentDate = arrivalLocalDate;
+                LocalDate currentDate = arrivalLocalDate;
 
-            while (currentDate.isBefore(departureLocalDate)) {
-                if (rs.next()) {
-                    LocalDate startDate = rs.getDate("startDate").toLocalDate();
-                    LocalDate endDate = rs.getDate("endDate").toLocalDate();
-                    double roomCost = rs.getDouble("price");
+                while (currentDate.isBefore(departureLocalDate)) {
+                    if (rs.next()) {
+                        LocalDate startDate = rs.getDate("startDate").toLocalDate();
+                        LocalDate endDate = rs.getDate("endDate").toLocalDate();
+                        double roomCost = rs.getDouble("price");
 
-                    // Apply the default rate to the days before the startDate of this room rate
-                    long daysBeforeRate = ChronoUnit.DAYS.between(currentDate, startDate);
-                    price += daysBeforeRate * defaultRate;
+                        // Apply the default rate to the days before the startDate of this room rate
+                        long daysBeforeRate = ChronoUnit.DAYS.between(currentDate, startDate);
+                        price += daysBeforeRate * defaultRate;
 
-                    // Calculate the intersection between the current date range and the date range of this room rate
-                    LocalDate intersectionStart = startDate.isAfter(currentDate) ? startDate : currentDate;
-                    LocalDate intersectionEnd = endDate.isBefore(departureLocalDate) ? endDate : departureLocalDate;
+                        // Calculate the intersection between the current date range and the date range of this room rate
+                        LocalDate intersectionStart = startDate.isAfter(currentDate) ? startDate : currentDate;
+                        LocalDate intersectionEnd = endDate.isBefore(departureLocalDate) ? endDate : departureLocalDate;
 
-                    // Calculate the number of days in the intersection and update the price
-                    long numberOfDays = ChronoUnit.DAYS.between(intersectionStart, intersectionEnd) + 1;
-                    price += roomCost * numberOfDays;
+                        // Calculate the number of days in the intersection and update the price
+                        long numberOfDays = ChronoUnit.DAYS.between(intersectionStart, intersectionEnd) + 1;
+                        price += roomCost * numberOfDays;
 
-                    // Update the currentDate to the day after the endDate of this room rate
-                    currentDate = endDate.plusDays(1);
-                } else {
-                    // Apply the default rate to the remaining days
-                    long remainingDays = ChronoUnit.DAYS.between(currentDate, departureLocalDate);
-                    price += remainingDays * defaultRate;
-                    break;
+                        // Update the currentDate to the day after the endDate of this room rate
+                        currentDate = endDate.plusDays(1);
+                    } 
+                    else {
+                        // Apply the default rate to the remaining days
+                        long remainingDays = ChronoUnit.DAYS.between(currentDate, departureLocalDate);
+                        price += remainingDays * defaultRate;
+                        break;
+                    }
                 }
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -764,13 +857,23 @@ public class CustomerOnlineReservation {
         return price;
     }
 
-    //function to convert date to local date
+    /**
+    * Converts a java.util.Date to a java.time.LocalDate.
+    *
+    * @param date The java.util.Date to be converted.
+    * @return The corresponding java.time.LocalDate.
+    */
     public static LocalDate convertToLocalDate(Date date) {
         Timestamp timestamp = new Timestamp(date.getTime());
         return timestamp.toLocalDateTime().toLocalDate();
     }
 
-    //function to check the experiation date of the card
+    /**
+    * Checks if the expiration date of a card is still valid.
+    *
+    * @param expirationDate The expiration date of the card.
+    * @return true if the expiration date is after the current date, false otherwise.
+    */
     public static boolean checkExpirationDateOfCard(Date expirationDate) {
     
         LocalDate expDate = convertToLocalDate(expirationDate);
@@ -782,13 +885,20 @@ public class CustomerOnlineReservation {
         if (expDate.isAfter(currentDate)) {
             // Card is still valid
             return true;
-        } else {
+        } 
+        else {
             // Card has expired
             return false;
         }
     }
 
-    //function to retrieve the existing customer card information
+    /**
+    * Retrieves the card information of an existing customer.
+    *
+    * @param con The connection to the database.
+    * @param customerID The ID of the customer.
+    * @return A Card object containing the card information of the customer.
+    */
     public static Card getcustomerCardInfo(Connection con, int customerID) {
         Card card = new Card();
         String query = "SELECT CreditCard.* FROM CreditCard JOIN Customer ON CreditCard.cardID = Customer.cardID WHERE Customer.customerID = ?";
@@ -804,16 +914,24 @@ public class CustomerOnlineReservation {
                 card.setCardToken(rs.getString("cardToken"));
                 card.setCardType(rs.getString("cardType"));
                 card.setExpirationDate(rs.getDate("expirationDate"));
-            } else {
+            } 
+            else {
                 System.out.println("Card not found for the provided customerID.");
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             System.out.println("Error while retrieving card information: " + e.getMessage());
         }
         return card;
     }
 
-    //function to retrieve the existing customer information
+    /**
+    * Retrieves the information of an existing customer.
+    *
+    * @param con The connection to the database.
+    * @param customerID The ID of the customer.
+    * @return A Customer object containing the information of the customer.
+    */
     public static Customer getCustomerInformation(Connection con, int customerID) {
         Customer customer = new Customer();
         String query = "SELECT * FROM Customer WHERE customerID = ?";
@@ -832,16 +950,24 @@ public class CustomerOnlineReservation {
                 customer.setCardID(rs.getInt("cardID"));
                 customer.setAddressID(rs.getInt("addressID"));
                 customer.setMembershipID(rs.getInt("membershipID"));
-            } else {
+            } 
+            else {
                 System.out.println("Customer not found with the provided customerID.");
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             System.out.println("Error while retrieving customer information: " + e.getMessage());
         }
         return customer;
     }
 
-    //get customerID
+    /**
+    * Prompts the user to enter a customer ID, validating that the input is a non-negative integer.
+    * If the user indicates they do not have a customer ID, returns -1.
+    *
+    * @param myScanner a Scanner object to read user input
+    * @return the customer ID entered by the user, or -1 if the user does not have a customer ID
+    */
     public static int getCustomerID(Scanner myScanner) {
         int inputCustomerID = -1;
 
@@ -857,18 +983,29 @@ public class CustomerOnlineReservation {
                     inputCustomerID = Integer.parseInt(myScanner.nextLine());
                     if (inputCustomerID >= 0) {
                         break;
-                    } else {
+                    } 
+                    else {
                         System.out.println("Customer ID must be greater than or equal to 0. Please enter a valid Customer ID:");
                     }
-                } catch (NumberFormatException e) {
+                } 
+                catch (NumberFormatException e) {
                     System.out.println("Invalid input. Please enter a valid Customer ID:");
                 }
             }
         }
+
+        //return customerID
         return inputCustomerID;
     }
 
-    // check if the customer is new or old
+    /**
+    * Checks if the customer exists in the database based on the provided customer ID.
+    *
+    * @param con The database connection
+    * @param myScanner The Scanner object for user input
+    * @param inputCustomerID The customer ID provided by the user
+    * @return Returns 1 if the customer exists in the database, 0 if the customer does not exist, or -100 if there is an error
+    */
     public static int checkCustomerStatus(Connection con, Scanner myScanner, int inputCustomerID) {
     
         // Check if the customer exists in the table using the provided customerID
@@ -881,23 +1018,29 @@ public class CustomerOnlineReservation {
                 if (rs.next()) {
                     // The customer is found in the table
                     return 1;
-                } else {
+                } 
+                else {
                     // The customer is not found in the table
                     return 0;
                 }
-            } catch (SQLException e) {
+            } 
+            catch (SQLException e) {
                 System.out.println(e.getMessage());
                 return -100;
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             System.out.println(e.getMessage());
             return -100;
         }
     }
     
     
-
-    //function to get the number of guests
+    /**
+    * This function prompts the user to enter the number of guests and validates that the input is a positive integer.
+    * @param myScanner A Scanner object used to get input from the user
+    * @return The number of guests entered by the user
+    */
     public static int getNumberOfGuests(Scanner myScanner) {
         int numberOfGuests;
         while (true) {
@@ -909,7 +1052,8 @@ public class CustomerOnlineReservation {
                 // Check if the number of guests is a positive integer
                 if (numberOfGuests <= 0) {
                     System.out.println("\nNumber of guests must be a positive integer. Please try again.");
-                } else {
+                } 
+                else {
                     break;
                 }
             } catch (NumberFormatException e) {
@@ -920,7 +1064,15 @@ public class CustomerOnlineReservation {
         return numberOfGuests;
     }
 
-    // Get the hotelID located with free reservations, located in the city chosen by user
+    /**
+    * Get the hotelID located with free reservations, located in the city chosen by user
+    * 
+    * @param con Connection to the database
+    * @param myScanner Scanner object for user input
+    * @param arrivalDate The arrival date in 'YYYY-MM-DD' format
+    * @param departureDate The departure date in 'YYYY-MM-DD' format
+    * @return The hotel ID of the selected hotel
+    */
     public static int getHotelID(Connection con, Scanner myScanner, String arrivalDate, String departureDate) {
 
         // Create a map to store city names and a list of hotel IDs and names within each city
@@ -1024,7 +1176,19 @@ public class CustomerOnlineReservation {
         return selectedHotelID.get();
     }
 
-    // get room types available in a particular hotel
+    /**
+    * Retrieves available room types in a particular hotel during a specified time period based on the number of guests.
+    *
+    * @param con Connection object to connect to the database.
+    * @param myScanner Scanner object to get user input.
+    * @param hotelID Integer value representing the hotel ID to get the available room types for.
+    * @param arrivalDate String value representing the arrival date in "YYYY-MM-DD" format.
+    * @param departureDate String value representing the departure date in "YYYY-MM-DD" format.
+    * @param numberOfGuests Integer value representing the number of guests.
+    * @return Integer value representing the selected room type ID, -1 if there are no available room types,
+    *         -4 if the user wants to change the number of guests, and -1 for any database related errors.
+    * @throws SQLException If there is an error executing the SQL statement.
+    */
     public static int getRoomTypeID(Connection con, Scanner myScanner, int hotelID, String arrivalDate, String departureDate, int numberOfGuests) {
 
         Map<Integer, Integer> roomTypeMaxGuests = new HashMap<>();
@@ -1155,7 +1319,12 @@ public class CustomerOnlineReservation {
         return selectedRoomTypeID;
     }
 
-    //function for getting yes or no input from the user
+    /**
+    * Prompts the user to enter 'Y' or 'N' and returns the user's input.
+    *
+    * @param myScanner Scanner object to get user input.
+    * @return String value representing the user's input, either 'Y' or 'N'.
+    */
     public static String getYesOrNoInput(Scanner myScanner) {
         String userInput;
         while (true) {
@@ -1163,14 +1332,20 @@ public class CustomerOnlineReservation {
     
             if (userInput.equals("Y") || userInput.equals("N")) {
                 break;
-            } else {
+            } 
+            else {
                 System.out.print("Invalid input. Please enter 'Y' or 'N':");
             }
         }
         return userInput;
     }
 
-    // function to get date
+    /**
+    * Prompts the user to enter a date in "YYYY-MM-DD" format, validates the input, and returns the date as a String.
+    *
+    * @param myScanner Scanner object to get user input.
+    * @return String value representing the validated date in "YYYY-MM-DD" format.
+    */
     public static String getDate(Scanner myScanner) {
         // set date format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -1193,11 +1368,13 @@ public class CustomerOnlineReservation {
                 if (parsedDate.isBefore(currentDate)) {
                     System.out.println(
                             "The entered date is in the past. Please enter a date greater than or equal to the current date.");
-                } else {
+                } 
+                else {
                     // If the date is valid, set validDate to true to exit the loop
                     validDate = true;
                 }
-            } catch (DateTimeParseException e) {
+            } 
+            catch (DateTimeParseException e) {
                 // If the input is not in the correct format, show an error message and ask for
                 // input again
                 System.out.println("Invalid date format. Please enter a valid date in the format YYYY-MM-DD.");

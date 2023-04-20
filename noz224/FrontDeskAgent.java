@@ -56,7 +56,14 @@ public class FrontDeskAgent {
         }
     }
 
-    //function to perform check-out
+    /**
+    * Performs check-out by updating the room status and check-out date in the database.
+    *
+    * @param con Connection object to connect to the database.
+    * @param reservation Reservation object representing the reservation being checked out.
+    * @param roomStatus String value representing the updated room status after check-out.
+    * @return boolean value indicating whether the check-out was successful or not.
+    */
     public static boolean checkOut(Connection con, Reservation reservation, String roomStatus) {
         int reservationId = reservation.getReservationID();
         int hotelId;
@@ -68,11 +75,13 @@ public class FrontDeskAgent {
             try (ResultSet rs1 = stmt1.executeQuery()) {
                 if (rs1.next()) {
                     hotelId = rs1.getInt("hotelID");
-                } else {
+                } 
+                else {
                     return false;
                 }
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -83,11 +92,13 @@ public class FrontDeskAgent {
             try (ResultSet rs2 = stmt2.executeQuery()) {
                 if (rs2.next()) {
                     roomId = rs2.getInt("roomID");
-                } else {
+                } 
+                else {
                     return false;
                 }
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -101,7 +112,8 @@ public class FrontDeskAgent {
             stmt3.registerOutParameter(5, Types.INTEGER);
             stmt3.execute();
             updateRoomStatusResult = stmt3.getInt(5);
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -120,11 +132,12 @@ public class FrontDeskAgent {
                     // Disable auto-commit
                     con.setAutoCommit(false);
                     con.commit();
-                    // Enable auto-commit again (if required)
+                    // Enable auto-commit again
                     con.setAutoCommit(true);
                     return true;
                 }
-            } catch (SQLException e) {
+            } 
+            catch (SQLException e) {
                 e.printStackTrace();
                 return false;
             }
@@ -132,13 +145,21 @@ public class FrontDeskAgent {
         return false;
     }
 
-    //function to perform check in
+    /**
+    * Performs check-in by identifying a room that matches the reservation's hotel and room type,
+    * updating the room status and inserting a new record into the CustomerRoom table with the check-in date.
+    *
+    * @param con Connection object to connect to the database.
+    * @param reservation Reservation object representing the reservation being checked in.
+    * @param roomStatus String value representing the updated room status after check-in.
+    * @param myScanner Scanner object to read user input.
+    * @return boolean value indicating whether the check-in was successful or not.
+    */
     public static boolean checkIn(Connection con, Reservation reservation, String roomStatus, Scanner myScanner) {
         try {
             // Get the hotel ID and roomTypeID from the reservation object
             int hotelID = reservation.getHotelID();
             int roomTypeID = reservation.getRoomTypeID();
-            System.out.println("Room type is :" + roomTypeID);
             int roomID;
     
             // Identify the hotel from the hotel table
@@ -150,7 +171,8 @@ public class FrontDeskAgent {
                     if (!hotelResult.next()) {
                         System.out.println("Hotel not found.");
                         return false;
-                    } else {
+                    } 
+                    else {
                         System.out.println("\nYour room assignment Information: ");
                         System.out.println("Hotel: " + hotelResult.getString("hotelName"));
                     }
@@ -168,7 +190,8 @@ public class FrontDeskAgent {
                     if (!roomTypeResult.next()) {
                         System.out.println("No rooms found for the given room type in the specified hotel.");
                         return false;
-                    } else {
+                    } 
+                    else {
                         roomID = roomTypeResult.getInt("roomID");
                         int roomNumber = roomTypeResult.getInt("roomNumber");
                         System.out.println("Room ID: " + roomID);
@@ -176,7 +199,6 @@ public class FrontDeskAgent {
                     }
                 }
             }
-            System.out.println("Pass 10");
 
             // Create a CallableStatement to call the stored procedure
             String storedProcedureCall = "{call UPDATE_ROOM_STATUS(?, ?, ?, ?, ?)}";
@@ -218,57 +240,61 @@ public class FrontDeskAgent {
                     return false;
                 }
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
             return false;
         }
     }
     
-    //function to get core reservation details of the customer
+    /**
+    * Retrieves the Reservation object for the specified customer ID from the database.
+    *
+    * @param con the Connection object used to interact with the database
+    * @param customerID the ID of the customer for which to retrieve the reservation
+    * @return a Reservation object representing the reservation for the specified customer ID,
+    *         or null if no reservation exists for the customer ID
+    */
     public static Reservation getReservation(Connection con, int customerID) {
         Reservation reservation = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-    
-        try {
-            String sql = "SELECT * FROM Reservation WHERE customerID = ?";
-            pstmt = con.prepareStatement(sql);
+        
+        // Use try-with-resources to automatically close the PreparedStatement and ResultSet objects
+        try (PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Reservation WHERE customerID = ?")) {
             pstmt.setInt(1, customerID);
-            rs = pstmt.executeQuery();
-    
-            if (rs.next()) {
-                int reservationID = rs.getInt("reservationID");
-                int hotelID = rs.getInt("hotelID");
-                int roomTypeID = rs.getInt("roomTypeID");
-                int numberOfGuests = rs.getInt("numberOfGuests");
-                Date arrivalDate = rs.getDate("arrivalDate");
-                Date departureDate = rs.getDate("departureDate");
-                String reservationStatus = rs.getString("reservationStatus");
-    
-                reservation = new Reservation(reservationID, customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus);
-            } else {
-                reservation = new Reservation(-1, customerID, -1, -1, -1, null, null, null);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int reservationID = rs.getInt("reservationID");
+                    int hotelID = rs.getInt("hotelID");
+                    int roomTypeID = rs.getInt("roomTypeID");
+                    int numberOfGuests = rs.getInt("numberOfGuests");
+                    Date arrivalDate = rs.getDate("arrivalDate");
+                    Date departureDate = rs.getDate("departureDate");
+                    String reservationStatus = rs.getString("reservationStatus");
+
+                    reservation = new Reservation(reservationID, customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus);
+                } 
+                else {
+                    // Return a default Reservation object with negative values for the ID fields to indicate that no reservation was found
+                    reservation = new Reservation(-1, customerID, -1, -1, -1, null, null, null);
+                }
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
-    
+        
+        //return the reservation object
         return reservation;
     }
     
 
-    //function to get customerID
+    /**
+    * Gets the customer ID for the given customer details from the Customer table in the database.
+    * 
+    * @param con the database connection
+    * @param myScanner the scanner to read input from the user
+    * @return the customer ID, or -1 if the customer is not found
+    */
     public static int getCustomerID(Connection con, Scanner myScanner) {
         int customerID = -1;
 
@@ -287,10 +313,12 @@ public class FrontDeskAgent {
                 // Ensure membershipID is greater than or equal to 0
                 if (membershipID >= 0) {
                     break;
-                } else {
+                } 
+                else {
                     System.out.println("Invalid membershipID. Please enter a valid membershipID (greater than or equal to 0).");
                 }
-            } catch (InputMismatchException e) {
+            } 
+            catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number for the membershipID.");
                 myScanner.nextLine(); // Clear the invalid input
             }
@@ -310,14 +338,21 @@ public class FrontDeskAgent {
             if (rs.next()) {
                 customerID = rs.getInt("customerID");
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         }
 
         return customerID;
     }
 
-    //print the menu and assk the front desk agent to enter the input
+    /**
+    * This method prints the front desk agent menu and asks the user to enter an input option.
+    * The method validates the user's input and returns it if valid.
+    *
+    * @param myScanner Scanner object to read input from user.
+    * @return An integer representing the user's input option. Returns -1 if the input is invalid.
+    */
     public static int printOptions(Scanner myScanner) {
         
         //validate the option
