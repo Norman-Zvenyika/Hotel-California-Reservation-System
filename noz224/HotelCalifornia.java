@@ -75,7 +75,8 @@ public class HotelCalifornia {
             catch (SQLException ex) {
                 if (ex.getErrorCode() == 1017) {
                     System.out.println("Incorrect username/ password. Please try again.");
-                } else {
+                } 
+                else {
                     System.out.println(ex.getMessage());
                     break;
                 }
