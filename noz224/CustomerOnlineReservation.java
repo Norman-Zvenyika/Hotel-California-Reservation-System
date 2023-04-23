@@ -1093,7 +1093,7 @@ public class CustomerOnlineReservation {
         "        WHERE rrt.hotelID = r.hotelID AND rrt.roomTypeID = r.roomTypeID" +
         "    )" +
         ")" +
-        "SELECT h.hotelID, h.hotelName, a.city " + 
+        "SELECT DISTINCT h.hotelID, h.hotelName, a.city " + 
         "FROM available_rooms ar " + 
         "JOIN Hotel h ON ar.hotelID = h.hotelID " +
         "JOIN Address a ON h.addressID = a.addressID " +
