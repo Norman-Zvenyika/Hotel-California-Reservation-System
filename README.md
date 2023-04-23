@@ -1,3 +1,9 @@
+#### CSE 341 Final Project
+#### Student name: Norman Zvenyika
+#### Email: noz224@lehigh.edu
+<br/>
+
+
 # HotelCalifornia Program
 
 This README file provides an overview of the HotelCalifornia project, explaining its purpose, key components, and file structure. The program offers a hotel reservation system with four main user interfaces: Customer Online Reservation, Front Desk Agent, Housekeeping, and Business Manager.
@@ -27,6 +33,8 @@ This README file provides an overview of the HotelCalifornia project, explaining
 
 ### 6. README.txt
    * Describes the program and its functionalities
+
+<br/>
 
 ## Program Interfaces
 
@@ -72,8 +80,12 @@ This README file provides an overview of the HotelCalifornia project, explaining
          * The PL/SQL procedure is set to update a record if there is any overlap between two room rates during a particular period
          * A new room rate ID is created only if there is no overlap between any dates
 
+<br/>
+
 ## Compilation
 * You can compile and launch HotelCalifornia program by using the makefile, using the `make run` command.
+
+<br/>
 
 ## Data Generation
 
