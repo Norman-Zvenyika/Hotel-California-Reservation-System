@@ -126,19 +126,19 @@ This README file provides an overview of the HotelCalifornia project. The progra
 
       #### A. View Aggregate Data Over a Period of Time
 
-      1. The program asks the user for the start and end dates.
-      2. Based on the provided dates, the program will display:
+      -  The program asks the user for the start and end dates.
+      -  Based on the provided dates, the program will display:
          - The occupancy rate of each hotel for the given time period.
          - The total revenue from each hotel.
          - Reservation statuses over time.
 
       #### B. Set Rates
 
-      1. The program will ask for the manager ID to identify the hotel to which the room type belongs.
-      2. The program prompts the manager if they want to change an existing room rate or set a new room rate for a specific room type.
-      3. The PL/SQL procedure is set to update a record if there is any overlap between two room rates during a particular period:
+      -  The program will ask for the manager ID to identify the hotel to which the room type belongs.
+      -  The program prompts the manager if they want to change an existing room rate or set a new room rate for a specific room type.
+      -  The PL/SQL procedure is set to update a record if there is any overlap between two room rates during a particular period:
          - For example, if there is a room rate between 2023-08-19 and 2023-08-20 for a specific room type and the manager enters a room rate for dates 2023-08-19 and 2023-08-24, this new room rate will override the existing room rate. Thus, the new room rate reflected in the database will become the new one.
-      4. A new room rate ID is created only if there is no overlap between any dates.
+      -  A new room rate ID is created only if there is no overlap between any dates.
 
 <br/>
 
