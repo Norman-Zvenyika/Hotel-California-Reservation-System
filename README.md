@@ -119,7 +119,7 @@ This README file provides an overview of the HotelCalifornia project. The progra
 
 ### 3. **Housekeeping**
    * The program requests the Customer's first name, last name, and membership ID
-   * Based on this information, the program will identify the room in which the user was accommodated and the room is set to available for use
+   * Based on this information, the program will identify the room in which the user was accommodated and the room is set to "Available" for use
 
 ### 4. **Business Manager**
    *  The program will prompt the manager with the following options:
