@@ -509,7 +509,8 @@ public class CustomerOnlineReservation {
             // Retrieve the generated membership ID
             membershipID = cstmt.getInt(1);
 
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -1056,7 +1057,8 @@ public class CustomerOnlineReservation {
                 else {
                     break;
                 }
-            } catch (NumberFormatException e) {
+            } 
+            catch (NumberFormatException e) {
                 System.out.println("\nInvalid input. Please enter a positive integer.");
             }
         }
