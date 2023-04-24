@@ -12,9 +12,11 @@ This README file provides an overview of the HotelCalifornia project. The progra
 
 ### 1. DataGeneration
    * Data
-      * Contains the generated insert statements for inserting data into the database
+      * Includes generated insert statements for populating the database
+      * Data generated using Python's Faker Library
    * Script
-      * Responsible for generating the insert statements
+      * Generates insert statements for the database
+      * Source code available in the notebook
 
 ### 2. Noz224
    * Java files
@@ -23,6 +25,8 @@ This README file provides an overview of the HotelCalifornia project. The progra
 ### 3. Other
    * PL/SQL
       * Contains PL/SQL scripts for creating the database, inserting records, and updating records in the database
+   * ER Diagram
+      * Containss the Entity-Relationship Diagram for the Hotel California database
 
 ### 4. Makefile
    * Commands
