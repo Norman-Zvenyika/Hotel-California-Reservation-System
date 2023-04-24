@@ -1274,7 +1274,7 @@ public class CustomerOnlineReservation {
 
         //check if we have any rooms available
         if (availableRoomTypeMaxGuests.isEmpty() ||  roomTypeMaxGuests.isEmpty()) {
-            System.out.println("\nThere are no available room types during the specified period.");
+            System.out.println("\nThere are no available room types to accomodate your all of guests during the specified period.");
             return selectedRoomTypeID;
         }
         
