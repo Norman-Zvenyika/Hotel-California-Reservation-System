@@ -413,7 +413,7 @@ public class BusinessManager {
                 break;
             } 
             else {
-                System.out.print("Invalid input. Please enter 'S' or 'U':");
+                System.out.print("Invalid input. Please enter 'S' or 'U': ");
             }
         }
         return userInput;
@@ -560,7 +560,7 @@ public class BusinessManager {
             } 
             catch (NumberFormatException e) {
                 // If the input is not a valid integer or decimal value, show an error message and ask for input again
-                System.out.println("Invalid input. Please enter a valid integer or decimal value.");
+                System.out.print("Invalid input. Please enter a valid integer or decimal value: ");
             }
         }
 
@@ -588,7 +588,7 @@ public class BusinessManager {
             } 
             catch (NumberFormatException e) {
                 // If the input is not a valid integer value, show an error message and ask for input again
-                System.out.println("Invalid input. Please enter a valid integer value.");
+                System.out.print("Invalid input. Please enter a valid integer value: ");
             }
         }
 
@@ -632,10 +632,9 @@ public class BusinessManager {
                     e.printStackTrace();
                 }
             } 
-            catch (InputMismatchException e) {
+            catch (NumberFormatException e) {
                 // If the input is not a valid integer value, show an error message and discard invalid input
                 System.out.println("Invalid input. Please enter an integer.");
-                myScanner.nextLine();
             }
         } while (!validInput);
 

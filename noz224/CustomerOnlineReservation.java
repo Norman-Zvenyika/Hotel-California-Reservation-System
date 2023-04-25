@@ -2,8 +2,11 @@ import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.Scanner;
 import java.time.LocalDate;
@@ -990,7 +993,7 @@ public class CustomerOnlineReservation {
                     }
                 } 
                 catch (NumberFormatException e) {
-                    System.out.println("Invalid input. Please enter a valid Customer ID:");
+                    System.out.print("Invalid input. Please enter a valid Customer ID: ");
                 }
             }
         }
@@ -1150,7 +1153,7 @@ public class CustomerOnlineReservation {
         System.out.print("\nEnter the name of the city from the given list: ");
         String city = myScanner.nextLine();
         while (!cityHotelMap.containsKey(city)) {
-            System.out.println("Invalid city. Please enter a city from the given list: ");
+            System.out.print("Invalid city. Please enter a city from the given list: ");
             city = myScanner.nextLine();
         }
 
@@ -1164,14 +1167,32 @@ public class CustomerOnlineReservation {
         }
 
         //request hotelID from the user
-        System.out.print("\nEnter the hotel ID from the list given above: ");
-        AtomicInteger selectedHotelID = new AtomicInteger(myScanner.nextInt());
-        myScanner.nextLine(); // Consume newline character
+        AtomicInteger selectedHotelID = new AtomicInteger(-1);
+        Set<Integer> validHotelIDs = hotelList.stream().map(hotel -> hotel.getKey()).collect(Collectors.toSet());
+        int hotelIDInput;
 
-        // Validate the entered hotel ID
-        while (hotelList.stream().noneMatch(hotel -> hotel.getKey() == selectedHotelID.get())) {
-            System.out.print("Invalid hotel ID. Please enter a hotel ID from the list given above: ");
-            selectedHotelID.set(Integer.parseInt(myScanner.nextLine()));
+        while (true) {
+            System.out.print("\nEnter the hotel ID from the list given above: ");
+
+            try {
+                hotelIDInput = myScanner.nextInt();
+            }
+            catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid hotel ID from the list above.");
+                myScanner.nextLine(); // Consume the invalid input
+                continue;
+            }
+            
+            myScanner.nextLine(); // Consume newline character
+
+            //validate the hotel ID
+            if (!validHotelIDs.contains(hotelIDInput)) {
+                System.out.println("Invalid hotel ID. Please enter a valid hotel ID from the list.");
+            }
+            else {
+                selectedHotelID.set(hotelIDInput);
+                break;
+            }
         }
 
         // Return the selected hotel ID
@@ -1274,7 +1295,7 @@ public class CustomerOnlineReservation {
 
         //check if we have any rooms available
         if (availableRoomTypeMaxGuests.isEmpty() ||  roomTypeMaxGuests.isEmpty()) {
-            System.out.println("\nThere are no available room types to accomodate your all of guests during the specified period.");
+            System.out.println("\nThere are no available room types to accomodate all of your guests during the specified period.");
             return selectedRoomTypeID;
         }
         
@@ -1307,11 +1328,17 @@ public class CustomerOnlineReservation {
             }
         }
         else {
-            System.out.print("Please enter a Room Type ID from the list above: ");
             while (true) {
-                selectedRoomTypeID = Integer.parseInt(myScanner.nextLine());
+                System.out.print("\nPlease enter a Room Type ID from the list above: ");
+                try{
+                    selectedRoomTypeID = Integer.parseInt(myScanner.nextLine());
+                }
+                catch(NumberFormatException e) {
+                    System.out.println("Invalid input. Enter integers only.\n");
+                    continue;
+                }
                 if (!availableRoomTypeMaxGuests.containsKey(selectedRoomTypeID)) {
-                    System.out.print("\nInvalid Room Type ID. Please enter a valid Room Type ID from the list above: ");
+                    System.out.print("\nInvalid Room Type ID.\n");
                 }
                 else {
                     break;
@@ -1379,7 +1406,7 @@ public class CustomerOnlineReservation {
             catch (DateTimeParseException e) {
                 // If the input is not in the correct format, show an error message and ask for
                 // input again
-                System.out.println("Invalid date format. Please enter a valid date in the format YYYY-MM-DD.");
+                System.out.print("Invalid date format. Please enter a valid date in the format YYYY-MM-DD: ");
             }
         }
 
