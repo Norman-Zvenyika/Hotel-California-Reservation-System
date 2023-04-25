@@ -86,8 +86,11 @@ public class FrontDeskAgent {
             return false;
         }
 
+        //new trigger so that reservation status is also set to checkedin if a customer successfully checks into a room
+        System.out.println("Reservation ID is "+ reservationId);
+
         // Retrieve the roomID from the CustomerRoom table using the reservationID
-        try (PreparedStatement stmt2 = con.prepareStatement("SELECT roomID FROM CustomerRoom WHERE reservationID = ? AND checkOutDate IS NULL")) {
+        try (PreparedStatement stmt2 = con.prepareStatement("SELECT roomID FROM CustomerRoom WHERE reservationID = ? AND checkOutDate IS NULL ORDER BY customerROOMID ASC FETCH FIRST 1 ROWS ONLY")) {
             stmt2.setInt(1, reservationId);
             try (ResultSet rs2 = stmt2.executeQuery()) {
                 if (rs2.next()) {
@@ -259,7 +262,7 @@ public class FrontDeskAgent {
         Reservation reservation = null;
         
         // Use try-with-resources to automatically close the PreparedStatement and ResultSet objects
-        try (PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Reservation WHERE customerID = ?")) {
+        try (PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Reservation WHERE customerID = ? ORDER BY reservationID DESC FETCH FIRST 1 ROWS ONLY")) {
             pstmt.setInt(1, customerID);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {

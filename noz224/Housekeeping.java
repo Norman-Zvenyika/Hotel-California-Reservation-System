@@ -83,6 +83,8 @@ public class Housekeeping {
                     else {
                         roomID = roomTypeResult.getInt("roomID");
                         int roomNumber = roomTypeResult.getInt("roomNumber");
+                        System.out.println("\nThe following room has been cleaned: ");
+                        System.out.println("HotelID: "+hotelID);
                         System.out.println("Room ID: " + roomID);
                         System.out.println("Room Number: " + roomNumber);
                     }

@@ -434,9 +434,6 @@ public class CustomerOnlineReservation {
             }
         }
 
-        //display the price
-        System.out.printf("\nYour total bill is $%.2f%n\n", bookingPrice);
-
         //format payment date
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -486,8 +483,58 @@ public class CustomerOnlineReservation {
             return false;
         }
 
-        // If paymentID > 0, return true, else return false.
+        if(paymentID>0) {
+            //display the reservation details
+            printReservationDetails(con, customerID, reservationID, hotelID, roomTypeID, arrivalDate, departureDate, bookingPrice);
+            return paymentID>0;
+        }
         return paymentID > 0;
+    }
+
+    /**
+    * Retrieves and prints reservation details from the database.
+    *
+    * @param con The connection to the database.
+    * @param customerID The customer's ID.
+    * @param reservationID The reservation's ID.
+    * @param hotelID The hotel's ID.
+    * @param roomTypeID The room type ID.
+    * @param arrivalDate The arrival date.
+    * @param departureDate The departure date.
+    * @param bookingPrice The total booking price.
+    */
+    private static void printReservationDetails(Connection con, int customerID, int reservationID, int hotelID, int roomTypeID,
+                                                String arrivalDate, String departureDate, double bookingPrice) {
+        try (PreparedStatement customerStmt = con.prepareStatement("SELECT * FROM customer WHERE customerid = ?");
+            PreparedStatement hotelStmt = con.prepareStatement("SELECT * FROM hotel WHERE hotelid = ?");
+            PreparedStatement roomTypeStmt = con.prepareStatement("SELECT * FROM roomtype WHERE roomtypeid = ?")) {
+
+            customerStmt.setInt(1, customerID);
+            ResultSet customerRs = customerStmt.executeQuery();
+
+            hotelStmt.setInt(1, hotelID);
+            ResultSet hotelRs = hotelStmt.executeQuery();
+
+            roomTypeStmt.setInt(1, roomTypeID);
+            ResultSet roomTypeRs = roomTypeStmt.executeQuery();
+
+            // Print reservation details if all queries return results
+            if (customerRs.next() && hotelRs.next() && roomTypeRs.next()) {
+                System.out.println("\nBelow are your reservation details: ");
+                System.out.println("Customer ID: " + customerID);
+                System.out.println("Membership ID: " + customerRs.getString("membershipid"));
+                System.out.println("First Name: " + customerRs.getString("firstname"));
+                System.out.println("Last Name: " + customerRs.getString("lastname"));
+                System.out.println("Hotel Name: " + hotelRs.getString("hotelname"));
+                System.out.println("Room Type ID: " + roomTypeID);
+                System.out.println("Arrival Date: " + arrivalDate);
+                System.out.println("Departure Date: " + departureDate);
+                System.out.printf("Your total bill is $%.2f%n%n", bookingPrice);
+            }
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
