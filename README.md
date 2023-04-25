@@ -26,7 +26,7 @@ This README file provides an overview of the HotelCalifornia project. The progra
    * PL/SQL
       * Contains PL/SQL scripts for creating the database, inserting records, and updating records in the database
    * ER Diagram
-      * Containss the Entity-Relationship Diagram for the Hotel California database
+      * Contains the Entity-Relationship Diagram for the Hotel California database
 
 ### 4. Makefile
    * Commands
@@ -99,10 +99,12 @@ This README file provides an overview of the HotelCalifornia project. The progra
       - Possible scenarios after entering this information:
          - If the information does not match any records in the customer reservation, the program will display "customer not found."
          - If the information is found, but the reservation status is not "Confirmed," the program will notify the user that they have no active reservation.
+            - if the customer has more than 1 reservation "Confirmed", the program will display all confirmed reservations and the customer is asked to select a single reservation that can be checked-in.
          - If the customer information is found and the reservation record has "Confirmed" status:
             - The program will ask if the user wants to change their room type.
             - If No:
                - The customer is checked into a room of the specific room type in a specific hotel based on the user reservation records.
+               - The reservation status is changed to "Checked-In" so that we know that the customer came to the hotel and utilized their reservation.
             - If Yes:
                - The program will display all room types with free rooms in the particular hotel.
                   - The program can display "no room available" if there are no free rooms of any room type available at the hotel.

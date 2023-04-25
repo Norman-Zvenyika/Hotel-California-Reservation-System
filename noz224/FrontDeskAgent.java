@@ -3,6 +3,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FrontDeskAgent {
     public static void mainMenu(Connection con, Statement s, Scanner myScanner) {
@@ -19,7 +21,7 @@ public class FrontDeskAgent {
         else {
 
             //check if the customer has a reservation
-            Reservation reservationDetails = getReservation(con, customerId);
+            Reservation reservationDetails = getReservation(con, customerId, myScanner, "Check-In");
 
             //if rervation is found, pull the room type, and hotelID
             if(reservationDetails.getReservationID()==-1 || !reservationDetails.getReservationStatus().equals("Confirmed")) {
@@ -44,6 +46,7 @@ public class FrontDeskAgent {
                         }
                         break;
                     case 2:
+                        reservationDetails = getReservation(con, customerId, myScanner, "Check-Out");
                         if(checkOut(con, reservationDetails, "Ready to be cleaned")) {
                             System.out.println("\nThe customer has successfully checked out of the room.");
                         }
@@ -85,9 +88,6 @@ public class FrontDeskAgent {
             e.printStackTrace();
             return false;
         }
-
-        //new trigger so that reservation status is also set to checkedin if a customer successfully checks into a room
-        System.out.println("Reservation ID is "+ reservationId);
 
         // Retrieve the roomID from the CustomerRoom table using the reservationID
         try (PreparedStatement stmt2 = con.prepareStatement("SELECT roomID FROM CustomerRoom WHERE reservationID = ? AND checkOutDate IS NULL ORDER BY customerROOMID ASC FETCH FIRST 1 ROWS ONLY")) {
@@ -191,7 +191,7 @@ public class FrontDeskAgent {
     
                 try (ResultSet roomTypeResult = roomTypeStmt.executeQuery()) {
                     if (!roomTypeResult.next()) {
-                        System.out.println("No rooms found for the given room type in the specified hotel.");
+                        System.out.println("\nUnfortunately, there were no free rooms found for the given room type in the specified hotel.");
                         return false;
                     } 
                     else {
@@ -258,14 +258,24 @@ public class FrontDeskAgent {
     * @return a Reservation object representing the reservation for the specified customer ID,
     *         or null if no reservation exists for the customer ID
     */
-    public static Reservation getReservation(Connection con, int customerID) {
+    public static Reservation getReservation(Connection con, int customerID, Scanner myScanner, String checkStatus) {
         Reservation reservation = null;
+        List<Reservation> reservations = new ArrayList<>();
+        String reservationQuery = "";
+
+        //determine whether a check-in or check out is happening.
+        if(checkStatus.equals("Check-In")) {
+            reservationQuery = "SELECT * FROM Reservation WHERE customerID = ? AND reservationStatus = 'Confirmed' ORDER BY reservationID ASC";
+        }
+        else {
+            reservationQuery = "SELECT * FROM Reservation WHERE customerID = ? AND reservationStatus = 'Checked-In' ORDER BY reservationID ASC";
+        }
         
-        // Use try-with-resources to automatically close the PreparedStatement and ResultSet objects
-        try (PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Reservation WHERE customerID = ? ORDER BY reservationID DESC FETCH FIRST 1 ROWS ONLY")) {
+        //retrieve the relevant records based on whether we are doing a check-in or check-out
+        try (PreparedStatement pstmt = con.prepareStatement(reservationQuery)) {
             pstmt.setInt(1, customerID);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
+                while (rs.next()) {
                     int reservationID = rs.getInt("reservationID");
                     int hotelID = rs.getInt("hotelID");
                     int roomTypeID = rs.getInt("roomTypeID");
@@ -274,21 +284,81 @@ public class FrontDeskAgent {
                     Date departureDate = rs.getDate("departureDate");
                     String reservationStatus = rs.getString("reservationStatus");
 
-                    reservation = new Reservation(reservationID, customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus);
-                } 
-                else {
-                    // Return a default Reservation object with negative values for the ID fields to indicate that no reservation was found
-                    reservation = new Reservation(-1, customerID, -1, -1, -1, null, null, null);
+                    Reservation tempReservation = new Reservation(reservationID, customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus);
+                    reservations.add(tempReservation);
                 }
             }
         } 
         catch (SQLException e) {
             e.printStackTrace();
         }
+
+        if (reservations.isEmpty()) {
+            // Return a default Reservation object with negative values for the ID fields to indicate that no reservation was found
+            reservation = new Reservation(-1, customerID, -1, -1, -1, null, null, null);
+        } 
+        else {
+            System.out.println("\nAvailable reservations:");
+            int index = 1;
+            System.out.printf("%-4s %-15s %-10s %-12s %-12s %-15s %-10s%n", "No.", "ReservationID", "HotelID", "RoomTypeID", "ArrivalDate", "DepartureDate", "Status");
+            for (Reservation r : reservations) {
+                System.out.printf("%-4d %-15d %-10d %-12d %-12s %-15s %-10s%n", index, r.getReservationID(), r.getHotelID(), r.getRoomTypeID(), r.getArrivalDate(), r.getDepartureDate(), r.getReservationStatus());
+                index++;
+            }
+
+            int reservationIndex;
+            boolean validInput;
+            do {
+                System.out.print("\nPlease choose a reservation by entering the corresponding number (1-" + reservations.size() + "): ");
+                validInput = true;
+                try {
+                    reservationIndex = Integer.parseInt(myScanner.nextLine());
+                } 
+                catch (Exception e) {
+                    System.out.println("Invalid input. Please enter an integer.");
+                    validInput = false;
+                    reservationIndex = -1;
+                }
+            } while (!validInput || reservationIndex < 1 || reservationIndex > reservations.size());
+
+            reservation = reservations.get(reservationIndex - 1);
+        }
+
+        //update the reservation status of the selected reservation to "Checked-In" using a procedure****
         
-        //return the reservation object
         return reservation;
     }
+    // public static Reservation getReservation(Connection con, int customerID) {
+    //     Reservation reservation = null;
+        
+    //     // Use try-with-resources to automatically close the PreparedStatement and ResultSet objects
+    //     try (PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Reservation WHERE customerID = ? ORDER BY reservationID DESC FETCH FIRST 1 ROWS ONLY")) {
+    //         pstmt.setInt(1, customerID);
+    //         try (ResultSet rs = pstmt.executeQuery()) {
+    //             if (rs.next()) {
+    //                 int reservationID = rs.getInt("reservationID");
+    //                 int hotelID = rs.getInt("hotelID");
+    //                 int roomTypeID = rs.getInt("roomTypeID");
+    //                 int numberOfGuests = rs.getInt("numberOfGuests");
+    //                 Date arrivalDate = rs.getDate("arrivalDate");
+    //                 Date departureDate = rs.getDate("departureDate");
+    //                 String reservationStatus = rs.getString("reservationStatus");
+
+    //                 reservation = new Reservation(reservationID, customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus);
+    //             } 
+    //             else {
+    //                 // Return a default Reservation object with negative values for the ID fields to indicate that no reservation was found
+    //                 reservation = new Reservation(-1, customerID, -1, -1, -1, null, null, null);
+    //             }
+    //         }
+    //     } 
+    //     catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+        
+    //     //return the reservation object
+    //     return reservation;
+    // }
     
 
     /**

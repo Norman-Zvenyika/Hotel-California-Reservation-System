@@ -204,7 +204,7 @@ public class CustomerOnlineReservation {
 
         //return status if reservation gets updated
         if(reservationUpdate) {
-            reservationDetails = FrontDeskAgent.getReservation(con, reservationDetails.getCustomerID());
+            reservationDetails = FrontDeskAgent.getReservation(con, reservationDetails.getCustomerID(), myScanner, "Check-In");
             System.out.println("\nThe room type has been updated successfully.");
         }
         else {

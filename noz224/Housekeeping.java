@@ -24,8 +24,8 @@ public class Housekeeping {
         } 
         else {
 
-            // Check if the customer has a reservation
-            Reservation reservationDetails = FrontDeskAgent.getReservation(con, customerId);
+            // Check if the customer has a reservation checked in in the reservation table
+            Reservation reservationDetails = FrontDeskAgent.getReservation(con, customerId, myScanner, "Checked-Out");
 
             // If reservation is found, pull the room type, and hotelID
             if (reservationDetails.getReservationID() == -1) {
