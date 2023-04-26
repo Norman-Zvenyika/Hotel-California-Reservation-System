@@ -1,0 +1,15 @@
+CREATE OR REPLACE PROCEDURE update_reservation_status (
+    p_reservation_id  IN Reservation.reservationID%TYPE,
+    p_status          IN Reservation.reservationStatus%TYPE
+) AS
+BEGIN
+    UPDATE Reservation
+    SET reservationStatus = p_status
+    WHERE reservationID = p_reservation_id;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END update_reservation_status;
+/

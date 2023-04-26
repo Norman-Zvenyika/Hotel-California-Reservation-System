@@ -19,18 +19,17 @@ public class FrontDeskAgent {
             System.out.println("\nThe customer was not found\n");
         }
         else {
+            //perform the actions according to check out or check in
+            switch(userOption) {
+                case 1:
+                    //check if the customer has a reservation
+                    Reservation reservationDetails = getReservation(con, customerId, myScanner, "Check-In");
 
-            //check if the customer has a reservation
-            Reservation reservationDetails = getReservation(con, customerId, myScanner, "Check-In");
-
-            //if rervation is found, pull the room type, and hotelID
-            if(reservationDetails.getReservationID()==-1 || !reservationDetails.getReservationStatus().equals("Confirmed")) {
-                System.out.println("\nThe customer has no confirmed reservation\n");
-            }
-            else {
-                //perform the actions according to check out or check in
-                switch(userOption) {
-                    case 1:
+                    //if rervation is found, pull the room type, and hotelID
+                    if(reservationDetails.getReservationID()==-1 || !reservationDetails.getReservationStatus().equals("Confirmed")) {
+                        System.out.println("\nThe customer has no confirmed reservation\n");
+                    }
+                    else{
                         //prompt the user to see if they want to change the roomtype
                         System.out.print("\nDo you want to change your room type?: ");
                         String changeRoomType = CustomerOnlineReservation.getYesOrNoInput(myScanner);
@@ -39,23 +38,35 @@ public class FrontDeskAgent {
                         }
     
                         if(checkIn(con, reservationDetails, "Occupied", myScanner)) {
+                            //update reservation status in the reservation table
+                            updateReservationStatus(con, reservationDetails, "Checked-In");
                             System.out.println("\nThe customer has successfully checked into the room.");
                         }
                         else {
                             System.out.println("\nThe check-in has failed");
                         }
-                        break;
-                    case 2:
-                        reservationDetails = getReservation(con, customerId, myScanner, "Check-Out");
+                    }
+                    break;
+                case 2:
+                    //check if the customer has checked in "Check-out is the key that we will use in getReservation"
+                    reservationDetails = getReservation(con, customerId, myScanner, "Check-Out");
+
+                    //if rervation is found, check if it is a valid reservation
+                    if(reservationDetails.getReservationID()==-1 || !reservationDetails.getReservationStatus().equals("Checked-In")) {
+                        System.out.println("\nThe customer has no confirmed reservation\n");
+                    }
+                    else {
                         if(checkOut(con, reservationDetails, "Ready to be cleaned")) {
+                            //update reservation status in the reservation table
+                            updateReservationStatus(con, reservationDetails, "Checked-Out");
                             System.out.println("\nThe customer has successfully checked out of the room.");
                         }
                         else {
                             System.out.println("\nThe check out has failed");
                         }
-                        break;
-                }
-            } 
+                    }
+                    break;
+            }
         }
     }
 
@@ -263,15 +274,22 @@ public class FrontDeskAgent {
         List<Reservation> reservations = new ArrayList<>();
         String reservationQuery = "";
 
-        //determine whether a check-in or check out is happening.
+        //during checking in, we need to retrieve confirmed reservation status belonging to a particular customer ID
         if(checkStatus.equals("Check-In")) {
             reservationQuery = "SELECT * FROM Reservation WHERE customerID = ? AND reservationStatus = 'Confirmed' ORDER BY reservationID ASC";
         }
-        else {
+
+        //during check-out, we need to retrieve "checked-in" reservation status belonging to a particular customer ID
+        else if (checkStatus.equals("Check-Out")) {
             reservationQuery = "SELECT * FROM Reservation WHERE customerID = ? AND reservationStatus = 'Checked-In' ORDER BY reservationID ASC";
         }
+
+        //during cleaning, we need to retrieve "checked-out" so that we can identify the hotel in which the customer lived
+        else if (checkStatus.equals("Checked-Out")) {
+            reservationQuery = "SELECT * FROM Reservation WHERE customerID = ? AND reservationStatus = 'Checked-Out' ORDER BY reservationID ASC";
+        }
         
-        //retrieve the relevant records based on whether we are doing a check-in or check-out
+        //retrieve the relevant records based on whether we are doing a check-in, check-out or cleaning
         try (PreparedStatement pstmt = con.prepareStatement(reservationQuery)) {
             pstmt.setInt(1, customerID);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -323,44 +341,31 @@ public class FrontDeskAgent {
 
             reservation = reservations.get(reservationIndex - 1);
         }
-
-        //update the reservation status of the selected reservation to "Checked-In" using a procedure****
-        
         return reservation;
     }
-    // public static Reservation getReservation(Connection con, int customerID) {
-    //     Reservation reservation = null;
-        
-    //     // Use try-with-resources to automatically close the PreparedStatement and ResultSet objects
-    //     try (PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Reservation WHERE customerID = ? ORDER BY reservationID DESC FETCH FIRST 1 ROWS ONLY")) {
-    //         pstmt.setInt(1, customerID);
-    //         try (ResultSet rs = pstmt.executeQuery()) {
-    //             if (rs.next()) {
-    //                 int reservationID = rs.getInt("reservationID");
-    //                 int hotelID = rs.getInt("hotelID");
-    //                 int roomTypeID = rs.getInt("roomTypeID");
-    //                 int numberOfGuests = rs.getInt("numberOfGuests");
-    //                 Date arrivalDate = rs.getDate("arrivalDate");
-    //                 Date departureDate = rs.getDate("departureDate");
-    //                 String reservationStatus = rs.getString("reservationStatus");
 
-    //                 reservation = new Reservation(reservationID, customerID, hotelID, roomTypeID, numberOfGuests, arrivalDate, departureDate, reservationStatus);
-    //             } 
-    //             else {
-    //                 // Return a default Reservation object with negative values for the ID fields to indicate that no reservation was found
-    //                 reservation = new Reservation(-1, customerID, -1, -1, -1, null, null, null);
-    //             }
-    //         }
-    //     } 
-    //     catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-        
-    //     //return the reservation object
-    //     return reservation;
-    // }
+    /**
+    * Updates the reservation status.
+    *
+    * @param con the Connection object used to interact with the database
+    * @param reservation the reservation object of the customer 
+    * @param reservationStatus the new status to be set for the reservationStatus
+    */
+    public static void updateReservationStatus(Connection con, Reservation reservation, String reservationStatus) {
+        try (CallableStatement cstmt = con.prepareCall("{call update_reservation_status(?, ?)}")) {
+            cstmt.setInt(1, reservation.getReservationID());
+            cstmt.setString(2, reservationStatus);
+            cstmt.execute();
+
+            // Update the reservation status in the Java object
+            reservation.setReservationStatus(reservationStatus);
+            System.out.println("\nReservation status has been updated.");
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
-
     /**
     * Gets the customer ID for the given customer details from the Customer table in the database.
     * 
