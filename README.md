@@ -4,11 +4,13 @@
 <br/>
 
 
-# HotelCalifornia Program
+# **HotelCalifornia Program**
 
 This README file provides an overview of the HotelCalifornia project. The program offers a hotel reservation system with four main user interfaces: Customer Online Reservation, Front Desk Agent, Housekeeping, and Business Manager.
 
-## File Structure
+<br/>
+
+## **File Structure**
 
 ### 1. DataGeneration
    * Data
