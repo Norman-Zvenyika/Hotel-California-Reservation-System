@@ -65,7 +65,7 @@ This README file provides an overview of the HotelCalifornia project. The progra
       #### E. Room Type Selection
 
       - The program displays room type ID, description, and max guests each room can accommodate, and the user is prompted to provide the room type ID.
-      - Constraints are set up to ensure that the user's number of guests does not exceed the maximum number of guests allowed.
+      - Constraints are set up to ensure that the user's number of guests does not exceed the maximum number of guests allowed in each room type.
 
       #### F. Customer ID
 
