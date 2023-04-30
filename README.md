@@ -125,7 +125,7 @@ This README file provides an overview of the HotelCalifornia project. The progra
 
 ### 3. **Housekeeping**
    * The program requests the Customer's first name, last name, and membership ID
-   * Based on this information, the program will identify the room in which the user was accommodated and the room is set to "Available" for use
+   * Based on this information, the program will identify the room in which the user was accommodated and the room status is set to "Available" for the next use.
 
 ### 4. **Business Manager**
    *  The program will prompt the manager with the following options:
@@ -152,6 +152,8 @@ This README file provides an overview of the HotelCalifornia project. The progra
    -  In a real-world scenario, it is recommended to add a password column to the customer table to ensure that customers cannot access each other's information. This enhances data security and privacy by requiring customers to provide a valid password before accessing their reservation details.
 
    - The customer online reservation system should provide customers with the flexibility to modify their departure dates, allowing them to either extend or shorten their stay as needed. This feature would improve the user experience by giving customers more control over their reservations, making the system more convenient and user-friendly.
+
+<br/>
 
 ## **Compilation**
 * You can compile and launch HotelCalifornia program by using the makefile, using the `make run` command.
