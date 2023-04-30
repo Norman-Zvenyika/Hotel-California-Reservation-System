@@ -65,10 +65,12 @@ public class CustomerOnlineReservation {
                     arrivalDate = getDate(myScanner);
                     System.out.println("Enter the departure date of your reservation (YYYY-MM-DD):");
                     departureDate = getDate(myScanner);
-                } else {
+                } 
+                else {
                     tryAgain = false;
                 }
-            } else {
+            } 
+            else {
                 tryAgain = false;
                 validHotelID = true;
             }
@@ -150,6 +152,7 @@ public class CustomerOnlineReservation {
             System.out.println("\nReservation cancelled. Try again.\n");
         }
     }
+
 
     /**
     * This function is used to convert an SQL Date object into a String in the format "yyyy-MM-dd".
@@ -1342,7 +1345,7 @@ public class CustomerOnlineReservation {
 
         //check if we have any rooms available
         if (availableRoomTypeMaxGuests.isEmpty() ||  roomTypeMaxGuests.isEmpty()) {
-            System.out.println("\nThere are no available room types to accomodate all of your guests during the specified period.");
+            System.out.println("\nThere are no available room types or the available rooms cannot accomodate all of your guests during the specified period.");
             return selectedRoomTypeID;
         }
         
@@ -1410,7 +1413,7 @@ public class CustomerOnlineReservation {
                 break;
             } 
             else {
-                System.out.print("Invalid input. Please enter 'Y' or 'N':");
+                System.out.print("Invalid input. Please enter 'Y' or 'N': ");
             }
         }
         return userInput;

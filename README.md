@@ -13,7 +13,7 @@ This README file provides an overview of the HotelCalifornia project. The progra
 ### 1. DataGeneration
    * Data
       * Includes generated insert statements for populating the database
-      * Data generated using Python's Faker Library
+      * Data was generated using Python's Faker Library
    * Script
       * Generates insert statements for the database
       * Source code available in the notebook
@@ -29,8 +29,7 @@ This README file provides an overview of the HotelCalifornia project. The progra
       * Contains the Entity-Relationship Diagram for the Hotel California database
 
 ### 4. Makefile
-   * Commands
-      * For running the program
+   * Commands for running the program
 
 ### 5. Manifest.txt
    * Specify the configuration settings for the JAR file that is created when the application is compiled
@@ -114,6 +113,7 @@ This README file provides an overview of the HotelCalifornia project. The progra
                   - If the difference is positive, the customer needs to pay an additional amount, which will be displayed to the user.
                   - If the difference is negative, the customer will get a refund, which will be displayed to the user.
                - The program will then update the reservation record and the payment record of the customer accordingly.
+               - Unfortunately, the dates of reservation cannot be changed according to the implementation of this project.
             - The room status of the specific room is then changed to "Occupied."
 
       #### B. Check-Out
@@ -147,6 +147,11 @@ This README file provides an overview of the HotelCalifornia project. The progra
       -  A new room rate ID is created only if there is no overlap between any dates.
 
 <br/>
+
+## **Future Work (not implemented)**
+   -  In a real-world scenario, it is recommended to add a password column to the customer table to ensure that customers cannot access each other's information. This enhances data security and privacy by requiring customers to provide a valid password before accessing their reservation details.
+
+   - The customer online reservation system should provide customers with the flexibility to modify their departure dates, allowing them to either extend or shorten their stay as needed. This feature would improve the user experience by giving customers more control over their reservations, making the system more convenient and user-friendly.
 
 ## **Compilation**
 * You can compile and launch HotelCalifornia program by using the makefile, using the `make run` command.

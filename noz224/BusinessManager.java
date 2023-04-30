@@ -188,7 +188,8 @@ public class BusinessManager {
                 System.out.printf("%-10d %-30s %-20s %-15d%n",
                         rs.getInt("hotelID"), rs.getString("hotelName"), rs.getString("reservationStatus"), rs.getInt("status_count"));
             }
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) {
             // Handle any exceptions that occur during the execution of the SQL query
             e.printStackTrace();
         }
@@ -255,7 +256,7 @@ public class BusinessManager {
                 hotelName = rs.getString("hotelName");
             }
 
-
+            //declare roomrateID and roomTypeID
             int roomRateID;
             int roomTypeID;
 

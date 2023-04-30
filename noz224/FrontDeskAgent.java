@@ -31,7 +31,7 @@ public class FrontDeskAgent {
                     }
                     else{
                         //prompt the user to see if they want to change the roomtype
-                        System.out.print("\nDo you want to change your room type?: ");
+                        System.out.print("\nDo you want to change your room type? (Y/N): ");
                         String changeRoomType = CustomerOnlineReservation.getYesOrNoInput(myScanner);
                         if(changeRoomType.equals("Y")) {
                             reservationDetails = CustomerOnlineReservation.changeRoomType(con, myScanner, reservationDetails);
