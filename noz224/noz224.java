@@ -1,7 +1,7 @@
 import java.util.Scanner;
 import java.sql.*;
 
-public class HotelCalifornia {
+public class noz224 {
     public static void main(String[] arg) {
 
         //scanner object

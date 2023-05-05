@@ -1,2 +1,2 @@
-Main-class: HotelCalifornia
+Main-class: noz224
 Class-Path: ojdbc8.jar
