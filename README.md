@@ -1,6 +1,5 @@
-#### CSE 341 Final Project
+#### Database Systems, Algorithms, and Applications Final Project
 #### Student name: Norman Zvenyika
-#### Email: noz224@lehigh.edu
 <br/>
 
 
